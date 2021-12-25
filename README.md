@@ -15,6 +15,7 @@
     └─aoaostar_com
         ├─base64
         ├─byte_calc
+        ├─emoji
         ├─example
         ├─file_hash
         ├─hash
