@@ -24,6 +24,8 @@
         │      ├─baidu
         │      ├─bkimg
         │      └─qq
+        ├─random_anime_images
+        ├─random_beauty_images
         ├─rand_password
         ├─timestamp
         ├─urlencode

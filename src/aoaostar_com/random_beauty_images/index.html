@@ -1,0 +1,120 @@
+{extend name="layout/plugin_layout" /}
+﻿
+{block name="title"}{$plugin.title} - {$app.title}{/block}
+{block name="head"}
+<script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.js"></script>
+{/block}
+{block name="main"}
+<div class="container mx-auto" id="app">
+    <div class="card lg:card-side bordered shadow-lg">
+        <div class="card-body overflow-auto">
+            <div class="main">
+                <div class="flex lg:flex-row flex-col">
+                    <div class="border mockup-window border-base-300 mb-4 lg:mb-0 lg:w-1/2">
+                        <div class="flex justify-center px-4 py-16 border-t border-base-300">
+                            <img class="w-full" :src="url.pc" alt="">
+                        </div>
+                    </div>
+                    <div class="mockup-phone">
+                        <div class="camera"></div>
+                        <div class="display">
+                            <div class="artboard phone-1 artboard-demo">
+                                <img class="w-full" :src="url.mobile" alt="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-actions mt-4">
+                    <button class="btn btn-primary flex-1" @click="copy(set.url.pc)">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                        </svg>
+                        复制电脑端地址
+                    </button>
+                    <button class="btn btn-primary flex-1" @click="copy(set.url.mobile)">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                        </svg>
+                        复制手机端地址
+                    </button>
+                    <button class="btn btn-primary flex-1" @click="refresh">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                  d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                                  clip-rule="evenodd"/>
+                        </svg>
+                        刷新
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            url: {
+                pc: 'https://i.v8cdn.cc/i/551f1674c001291.jpg',
+                mobile: 'https://i.v8cdn.cc/i/551f1674c001291.jpg',
+            },
+            set: {
+                url: {
+                    loading: 'https://i.v8cdn.cc/i/551f1674c001291.jpg',
+                    pc: 'https://i.v8cdn.cc/s/beauty.jpg',
+                    mobile: 'https://i.v8cdn.cc/s/beauty_m.jpg',
+                },
+            },
+        },
+        created() {
+            this.load()
+
+        },
+        methods: {
+            copy(text) {
+                copy(text)
+                $message.success('复制成功')
+            },
+            loadImage(url) {
+                return new Promise((resolve => {
+                    let image = new Image();
+                    image.src = url
+                    let that = this;
+                    image.onload = function () {
+                        console.log(123)
+                        resolve(image.src)
+                    }
+                }))
+            },
+            load() {
+                let task = [
+                    this.loadImage(this.set.url.pc + '?t=' + new Date().getTime()).then(res => {
+                        this.url.pc = res
+                    }),
+                    this.loadImage(this.set.url.mobile + '?t=' + new Date().getTime()).then(res => {
+                        this.url.mobile = res
+                    })]
+                return Promise.all(task)
+
+            },
+            refresh() {
+                const loading = $message.loading('正在加载中');
+                this.load()
+                    .catch(e=>{
+                        $message.error(e)
+                    })
+                    .finally(() => {
+                        loading.close()
+                    })
+            },
+        },
+    })
+
+</script>
+
+{/block}
