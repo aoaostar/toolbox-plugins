@@ -9,19 +9,23 @@
 
 ### 目录树
 ```
-│  README.md
-│
-└─packages
+├─dist
+│  └─aoaostar_com
+└─src
     └─aoaostar_com
-            base64.zip
-            byte_calc.zip
-            example.zip
-            file_hash.zip
-            hash.zip
-            image2base64.zip
-            image_url.zip
-            rand_password.zip
-            timestamp.zip
-            urlencode.zip
-            uuid.zip
+        ├─base64
+        ├─byte_calc
+        ├─example
+        ├─file_hash
+        ├─hash
+        ├─image2base64
+        ├─image_url
+        │  └─nodes
+        │      ├─baidu
+        │      ├─bkimg
+        │      └─qq
+        ├─rand_password
+        ├─timestamp
+        ├─urlencode
+        └─uuid
 ```

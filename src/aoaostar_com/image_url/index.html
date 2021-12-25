@@ -1,0 +1,241 @@
+{extend name="layout/plugin_layout" /}
+﻿
+{block name="title"}{$plugin.title} - {$app.title}{/block}
+{block name="head"}
+<script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.js"></script>
+{/block}
+{block name="main"}
+<div class="container mx-auto" id="app">
+    <div class="card lg:card-side bordered shadow-lg">
+        <div class="card-body overflow-auto">
+            <div class="main">
+                <div class="text-center py-12 bg-base-200 hover:bg-base-300 mb-4 rounded relative">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                    </svg>
+                    <span>拖拽文件到这里或者点击选择文件</span>
+                    <input @change="selectFile" class="opacity-0 absolute top-0 left-0 h-full w-full cursor-pointer"
+                           type="file" id="file" multiple>
+                </div>
+                <div class="alert">
+                    <div class="flex-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#2196f3"
+                             class="w-6 h-6 mx-2">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <label>可同时选择多个文件上传<br>
+                            一经上传，将无法删除，本站也不会保存
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex  my-4">
+                    <div class="form-control" v-for="(item,index) in nodes" :key="index">
+                        <label class="cursor-pointer label">
+                            <input type="radio" name="set.node" class="radio" v-model="set.node" :value="item.key">
+                            <span class="label-text ml-4">{{item.title}}</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button v-for="v in set.outputTypes.items" class="btn btn-outline btn-sm"
+                        :class="{'btn-active':set.outputTypes.current===v.key}"
+                        @click="set.outputTypes.current=v.key"
+                >
+                    {{v.title}}
+                </button>
+            </div>
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text">URL</span>
+                </label>
+                <textarea v-model="result" class="textarea textarea-bordered h-64"></textarea>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+
+    const get_proxy_url = (url) => {
+        return '//i0.wp.com/' + url.replace(/^http[s]?:\/\//, '', url)
+    }
+    const sendRequest = (file, node) => {
+        let formData = new FormData();
+        formData.append('file', file)
+        formData.append('node', node)
+        return httpPost('/api/{$plugin.alias}/upload', formData)
+    }
+
+    new Vue({
+        el: '#app',
+        data: {
+            nodes: [
+                {
+                    title: 'QQ',
+                    key: 'qq',
+                },
+                {
+                    title: '百度',
+                    key: 'baidu',
+                },
+                {
+                    title: '百度[bkimg]',
+                    key: 'bkimg',
+                },
+            ],
+            set: {
+                node: 'qq',
+                outputTypes: {
+                    current: 'URL',
+                    items: [
+                        {
+                            title: 'URL',
+                            key: 'URL',
+                            template: '#url#',
+                        },
+                        {
+                            title: 'HTML',
+                            key: 'HTML',
+                            template: '<img src="#url#"/>',
+                        },
+                        {
+                            title: 'BBCode',
+                            key: 'BBCode',
+                            template: '[img]#url#[/img]',
+                        },
+                        {
+                            title: 'Markdown',
+                            key: 'Markdown',
+                            template: '![group.png](#url#)',
+                        },
+                        {
+                            title: 'Markdown With Link',
+                            key: 'MarkdownWithLink',
+                            template: '[![](#url#)](#url#)',
+                        },
+                    ]
+                },
+                output: []
+            },
+            urls: {},
+            result: '',
+        },
+        created() {
+        },
+        mounted() {
+            document.addEventListener("paste", this.onPaste);
+        },
+        watch: {
+            'set.output'(newVal) {
+                let list = []
+                for (item of this.set.outputTypes.items) {
+                    let arr = []
+                    for (const v of newVal) {
+                        arr.push(item.template.replaceAll('#url#', v))
+                    }
+                    list[item.key] = arr;
+                }
+                this.urls = list
+            },
+            'urls'(newVal) {
+                this.result = this.urls[this.set.outputTypes.current].join('\n')
+            },
+            'set.outputTypes.current'(newVal) {
+                this.result = this.urls[this.set.outputTypes.current].join('\n')
+            }
+        },
+        methods: {
+            selectFile(e) {
+                this.upload(e.target.files, this.set.node)
+            },
+            addUrl(url) {
+                this.set.output.push(url)
+            },
+            async upload(files, node) {
+                const loading = $message.loading('正在上传图片')
+                try {
+                    let tasks = []
+                    for (file of files) {
+                        tasks.push(sendRequest(file, node).then(res => {
+                            if (res.status === 'ok') {
+                                this.addUrl(res.data.url)
+                            } else if (res.message) {
+                                throw res;
+                            }
+                        }))
+                    }
+                    Promise.all(tasks).finally(() => {
+                        loading.close();
+                    })
+                } catch (e) {
+                    $message.error(e.message)
+                    loading.close();
+                }
+            },
+            onPaste(event) {
+                // 监听 ctrl+v键盘事件
+                let that = this;
+                if (event.clipboardData || event.originalEvent) {
+                    let clipboardData =
+                        event.clipboardData || event.originalEvent.clipboardData;
+                    if (clipboardData.items) {
+                        // for chrome
+                        let items = clipboardData.items,
+                            len = items.length,
+                            blob = null;
+                        event.preventDefault();
+                        for (let i = 0; i < len; i++) {
+                            if (items[i].type.indexOf("image") !== -1) {
+                                blob = items[i].getAsFile();
+                                if (blob != null) {
+                                    that.upload([changeBlobFileName(blob)], that.set.node)
+                                }
+                            }
+                            if (items[i].type === "text/plain") {
+
+                                items[i].getAsString(function (text) {
+                                    let arr = text.split(/[(\r\n)\r\n]+/); // 以转行符切割文本字符串
+                                    let files = []
+                                    let tasks = []
+                                    for (let k in arr) {
+                                        const item = arr[k].trim();
+                                        if (item) {
+                                            if (!/^(https\:|http\:|)\/\//.test(item)) {
+                                                $message.error(`[${item}]URL异常，请输入正确的URL`)
+                                                return;
+                                            }
+                                            const loading = $message.loading('正在获取远程图片')
+                                            tasks.push(
+                                                fetch(get_proxy_url(item), {
+                                                    mode: "cors",
+                                                }).then(async (res) => {
+                                                    if (res.ok) {
+                                                        return res.blob();
+                                                    }
+                                                    $message.error('图片获取失败')
+                                                }).then(blob => {
+                                                    files.push(changeBlobFileName(blob))
+                                                }).finally(() => loading.close()))
+                                        }
+                                    }
+                                    Promise.all(tasks).then(() => {
+                                        that.upload(files, that.set.node)
+                                    })
+                                })
+                            }
+                        }
+                    }
+                }
+            },
+        },
+    })
+
+</script>
+
+{/block}

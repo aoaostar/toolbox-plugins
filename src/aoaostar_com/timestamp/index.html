@@ -1,0 +1,133 @@
+{extend name="layout/plugin_layout" /}
+﻿
+{block name="title"}{$plugin.title} - {$app.title}{/block}
+{block name="head"}
+<script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.js"></script>
+{/block}
+{block name="main"}
+<div class="container mx-auto" id="app">
+    <div class="card lg:card-side bordered shadow-lg">
+        <div class="card-body overflow-auto">
+            <div class="main">
+                <div class="form-control  mb-4">
+                    <div class="relative input-group">
+                        <span class="w-32">当前时间</span>
+                        <input type="number" v-model="set.current_time.value"
+                               class="w-full pr-16 input  input-bordered">
+                        <div class="absolute top-0 right-0  btn-group">
+                            <select class="select select-bordered" v-model="set.current_time.second">
+                                <option value="true">秒</option>
+                                <option value="">毫秒</option>
+                            </select>
+                            <button class="btn btn-outline" @click="set.current_time.status=!set.current_time.status">
+                                {{set.current_time.status?'停止':'开始'}}
+                            </button>
+                            <button class="btn btn-outline">刷新</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-control mb-4">
+                    <div class="relative input-group">
+                        <span class="w-32">Unix时间戳</span>
+                        <input type="number" v-model="set.timestamp.value"
+                               class="w-full pr-16 input  input-bordered">
+                        <div class="absolute top-0 right-0  btn-group">
+                            <select class="select select-bordered" v-model="set.timestamp.second">
+                                <option value="true">秒</option>
+                                <option value="">毫秒</option>
+                            </select>
+                            <button class="btn btn-outline" @click="toLocaltime">转换</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-control mb-4">
+                    <div class="relative input-group">
+                        <span class="w-32">北京时间</span>
+                        <input type="text" v-model="set.localtime"
+                               class="w-full pr-16 input  input-bordered">
+                        <div class="absolute top-0 right-0  btn-group">
+                            <button class="btn btn-outline" @click="toTimestamp">转换</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            set: {
+                current_time: {
+                    value: (new Date().getTime() / 1000).toFixed(),
+                    status: true,
+                    timer: null,
+                    second: true
+                },
+                timestamp: {
+                    value: (new Date().getTime() / 1000).toFixed(),
+                    second: true
+                },
+                localtime: dateFormat(new Date()),
+            },
+        },
+        created() {
+            this.startTimer()
+        },
+        watch: {
+            'set.current_time.second'(newVal) {
+                this.updateCurrentTime();
+            },
+            'set.current_time.status'(newVal) {
+                if (newVal) {
+                    this.startTimer()
+                } else {
+                    clearInterval(this.set.current_time.timer)
+                }
+            },
+            'set.timestamp.second'(newVal) {
+                this.updateTimestamp()
+            },
+        },
+        methods: {
+            startTimer() {
+                this.set.current_time.timer = setInterval(() => {
+                    this.updateCurrentTime();
+                }, 1000)
+            },
+            toTimestamp() {
+                let dateTmp = this.set.localtime.replace(/-/g, '/')
+                let timestamp = Date.parse(dateTmp);
+                this.updateTimestamp(timestamp)
+            },
+            toLocaltime() {
+                let timestamp = this.set.timestamp.value;
+                if (timestamp.toString().length === 10) {
+                    timestamp = timestamp * 1000
+                }
+                this.set.localtime = dateFormat(new Date(parseInt(timestamp)))
+            },
+            updateCurrentTime() {
+                let timestamp = new Date().getTime();
+                if (this.set.current_time.second) {
+                    timestamp = (timestamp / 1000).toFixed()
+                }
+                this.set.current_time.value = timestamp;
+            },
+            updateTimestamp(timestamp) {
+                if (!timestamp){
+                    timestamp = new Date().getTime();
+                }
+                if (this.set.timestamp.second) {
+                    timestamp = (timestamp / 1000).toFixed()
+                }
+                this.set.timestamp.value = timestamp;
+            }
+        },
+    })
+
+</script>
+
+{/block}

@@ -1,0 +1,173 @@
+{extend name="layout/plugin_layout" /}
+﻿
+{block name="title"}{$plugin.title} - {$app.title}{/block}
+{block name="head"}
+<script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.js"></script>
+{/block}
+{block name="main"}
+<div class="container mx-auto" id="app">
+    <div class="card lg:card-side bordered shadow-lg">
+        <div class="card-body overflow-auto">
+            <div class="main">
+                <div class="text-center py-12 bg-base-200 hover:bg-base-300 mb-4 rounded relative">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                    </svg>
+                    <span>拖拽文件到这里或者点击选择文件</span>
+                    <input @change="selectFile" class="opacity-0 absolute top-0 left-0 h-full w-full cursor-pointer"
+                           type="file" id="file" multiple>
+                </div>
+                <div class="alert">
+                    <div class="flex-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#2196f3"
+                             class="w-6 h-6 mx-2">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <label>可同时选择多个文件计算<br>
+                            使用crypto-js 本地计算，文件不会被上传到服务器
+                        </label>
+                    </div>
+                </div>
+                <div class="flex mt-4">
+                    <div class="form-control">
+                        <label class="cursor-pointer label">
+                            <input type="checkbox" v-model="set.md5" class="checkbox">
+                            <span class="label-text ml-4">MD5</span>
+                        </label>
+                    </div>
+                    <div class="form-control">
+                        <label class="cursor-pointer label">
+                            <input type="checkbox" v-model="set.sha1" class="checkbox">
+                            <span class="label-text ml-4">SHA1</span>
+                        </label>
+                    </div>
+                    <div class="form-control">
+                        <label class="cursor-pointer label">
+                            <input type="checkbox" v-model="set.sha3" class="checkbox">
+                            <span class="label-text ml-4">SHA3</span>
+                        </label>
+                    </div>
+                    <div class="form-control">
+                        <label class="cursor-pointer label">
+                            <input type="checkbox" v-model="set.sha224" class="checkbox">
+                            <span class="label-text ml-4">SHA224</span>
+                        </label>
+                    </div>
+                    <div class="form-control">
+                        <label class="cursor-pointer label">
+                            <input type="checkbox" v-model="set.sha256" class="checkbox">
+                            <span class="label-text ml-4">SHA256</span>
+                        </label>
+                    </div>
+                    <div class="form-control">
+                        <label class="cursor-pointer label">
+                            <input type="checkbox" v-model="set.sha384" class="checkbox">
+                            <span class="label-text ml-4">SHA384</span>
+                        </label>
+                    </div>
+                    <div class="form-control">
+                        <label class="cursor-pointer label">
+                            <input type="checkbox" v-model="set.sha512" class="checkbox">
+                            <span class="label-text ml-4">SHA512</span>
+                        </label>
+                    </div>
+                    <div class="form-control">
+                        <label class="cursor-pointer label">
+                            <input type="checkbox" v-model="set.ripemd160" class="checkbox">
+                            <span class="label-text ml-4">RIPEMD160</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="overflow-x-auto mt-4" v-if="Object.keys(result).length > 0">
+                <table class="table w-full">
+                    <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Result</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="(v,k) in result" :key="k">
+                        <td v-html="v.key">{{v.key}}</td>
+                        <td v-html="v.value">{{v.value}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            set: {
+                md5: true,
+                sha1: true,
+                sha3: false,
+                sha256: false,
+                sha224: false,
+                sha512: false,
+                sha384: false,
+                ripemd160: false,
+            },
+            algorithms: [
+                'md5',
+                'sha1',
+                'sha3',
+                'sha256',
+                'sha224',
+                'sha512',
+                'sha384',
+                'ripemd160',
+            ],
+            result: [],
+        },
+        created() {
+        },
+        methods: {
+            hash(file, algorithms) {
+                return new Promise((resolve) => {
+                    let reader = new FileReader();
+                    reader.onload = (e) => {
+                        const wordArray = CryptoJS.lib.WordArray.create(reader.result);
+                        let r = CryptoJS[algorithms](wordArray).toString()
+                        resolve(r)
+                    }
+                    reader.readAsArrayBuffer(file)
+                })
+            },
+            async selectFile(e) {
+                let loading = $message.loading('正在计算中');
+                let list = []
+                for (const file of e.target.files) {
+                    list.push({
+                        key: `<div class="font-bold">${file.name}</div>`,
+                        value: `<div class="font-bold">${file.type} - ${file.size} bytes</div>`,
+                    })
+                    for (const v of Object.keys(this.set)) {
+                        if (this.set[v]){
+                            await this.hash(file, v.toUpperCase()).then(res => {
+                                list.push({
+                                    key: `${v}`,
+                                    value: `${res}`,
+                                })
+                            })
+                        }
+                    }
+                }
+                this.result = list
+                loading.close();
+
+            },
+        },
+    })
+
+</script>
+
+{/block}

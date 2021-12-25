@@ -1,0 +1,89 @@
+{extend name="layout/plugin_layout" /}
+﻿
+{block name="title"}{$plugin.title} - {$app.title}{/block}
+{block name="head"}
+<script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.js"></script>
+{/block}
+{block name="main"}
+<div class="container mx-auto" id="app">
+    <div class="card lg:card-side bordered shadow-lg">
+        <div class="card-body overflow-auto">
+            <div class="main">
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">字符串</span>
+                    </label>
+                    <input v-model="set.text" type="text" placeholder="需要计算的字符串"
+                           class="input input-bordered">
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">秘钥，非必填，Hmac需要</span>
+                    </label>
+                    <input v-model="set.key" type="text" placeholder="秘钥"
+                           class="input input-bordered">
+                </div>
+            </div>
+            <div class="card-actions">
+                <button class="btn btn-primary btn-block" @click="calculate">计算</button>
+            </div>
+            <div class="overflow-x-auto mt-4" v-if="Object.keys(result).length > 0">
+                <table class="table w-full">
+                    <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Result</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="(v,k) in result" :key="k">
+                        <td>{{k}}</td>
+                        <td>{{v}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            set: {
+                text: '',
+                key: '',
+            },
+            result: {},
+        },
+        created() {
+        },
+        methods: {
+            calculate() {
+                const list = [
+                    'md5',
+                    'sha1',
+                    'sha3',
+                    'sha256',
+                    'sha224',
+                    'sha512',
+                    'sha384',
+                    'ripemd160',
+                ];
+
+                let arr = {}
+                for (const v of list) {
+                    arr[v] = CryptoJS[v.toUpperCase()](this.set.text).toString()
+                }
+                for (const v of list) {
+                    arr['hmac-' + v] = CryptoJS['Hmac' + v.toUpperCase()](this.set.text, this.set.key).toString()
+                }
+                this.result = arr
+            },
+        },
+    })
+
+</script>
+
+{/block}

@@ -1,0 +1,121 @@
+{extend name="layout/plugin_layout" /}
+﻿
+{block name="title"}{$plugin.title} - {$app.title}{/block}
+{block name="head"}
+<script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.js"></script>
+{/block}
+{block name="main"}
+<div class="container mx-auto" id="app">
+    <div class="card lg:card-side bordered shadow-lg">
+        <div class="card-body overflow-auto">
+            <div class="main">
+                <div class="text-center py-12 bg-base-200 hover:bg-base-300 mb-4 rounded relative">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                    </svg>
+                    <span>拖拽文件到这里或者点击选择文件</span>
+                    <input @change="selectFile" class="opacity-0 absolute top-0 left-0 h-full w-full cursor-pointer"
+                           type="file" id="file">
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">预览</span>
+                    </label>
+                    <div  class="textarea textarea-bordered h-64">
+                        <img v-show="set.preview" class="h-full" :src="set.preview" alt="">
+                    </div>
+                </div>
+                <div class="card-actions mt-4">
+                    <button class="btn btn-primary flex-1" @click="decode">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M7 11l5-5m0 0l5 5m-5-5v12"/>
+                        </svg>
+                        还原
+                    </button>
+                    <button class="btn btn-primary flex-1" @click="reset">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                  d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                                  clip-rule="evenodd"/>
+                        </svg>
+                        清空
+                    </button>
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">结果</span>
+                    </label>
+                    <textarea v-model="set.output" class="textarea textarea-bordered  h-64"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            set: {
+                preview: '',
+                output: '',
+            },
+        },
+        created() {
+        },
+        methods: {
+            encode(file) {
+                console.log(file)
+                return new Promise((resolve, reject) => {
+                    try {
+                        let reader = new FileReader();
+                        reader.onload = (e) => {
+                            const wordArray = CryptoJS.lib.WordArray.create(reader.result);
+                            let r = CryptoJS.enc.Base64.stringify(wordArray);
+                            if (file.type.startsWith('image')) {
+                                r = `data:${file.type};base64,${r}`;
+                            } else {
+                                r = `data:image/jpeg;base64,${r}`;
+                            }
+                            return resolve(r)
+                        }
+                        reader.readAsArrayBuffer(file)
+                    } catch (e) {
+                        return reject(e)
+                    }
+                })
+            },
+            decode() {
+                if (!this.set.output.startsWith('data:image')){
+                    this.set.preview = `data:image/jpeg;base64,${this.set.output}`
+                }else{
+                    this.set.preview = this.set.output
+                }
+            },
+            reset() {
+                this.set.output = ''
+                this.set.preview = ''
+
+            },
+            async selectFile(e) {
+                let loading = $message.loading('正在计算中');
+                if (e.target.files.length > 0) {
+                    this.encode(e.target.files[0]).then(res => {
+                        this.set.output = res
+                        this.set.preview = res
+                    }).catch(e => {
+                        $message.error(e.message)
+                    })
+                }
+                loading.close();
+            },
+        },
+    })
+
+</script>
+
+{/block}
