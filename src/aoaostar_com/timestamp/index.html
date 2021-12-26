@@ -22,7 +22,7 @@
                             <button class="btn btn-outline" @click="set.current_time.status=!set.current_time.status">
                                 {{set.current_time.status?'停止':'开始'}}
                             </button>
-                            <button class="btn btn-outline">刷新</button>
+                            <button class="btn btn-outline" @click="updateCurrentTime">刷新</button>
                         </div>
                     </div>
                 </div>
