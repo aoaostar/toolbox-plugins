@@ -56,9 +56,9 @@ class App implements Drive
         if (!class_exists($node)) {
             return msg('error', "该节点[$node]不存在");
         }
-        $bkimg = new $node();
+        $instance = new $node();
         try {
-            $res = $bkimg->main($tmpDir . DIRECTORY_SEPARATOR . $filename);
+            $res = $instance->main($tmpDir . DIRECTORY_SEPARATOR . $filename);
         } catch (\Exception $e) {
 
             return msg('error', $e->getMessage());

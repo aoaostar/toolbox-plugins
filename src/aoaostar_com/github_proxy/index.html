@@ -1,0 +1,139 @@
+{extend name="layout/plugin_layout" /}
+﻿
+{block name="title"}{$plugin.title} - {$app.title}{/block}
+{block name="head"}{/block}
+{block name="main"}
+<div class="container mx-auto" id="app">
+    <div class="card lg:card-side bordered shadow-lg">
+        <div class="card-body overflow-auto">
+            <div class="main">
+                <div class="alert">
+                    <div class="flex-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#2196f3" class="w-6 h-6 mx-2">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <label>有些节点不支持某些文件的下载，切换节点即可解决</label>
+                    </div>
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Github链接</span>
+                    </label>
+                    <textarea v-model="set.input" class="textarea textarea-bordered  h-64"></textarea>
+                </div>
+                <div class="form-control ">
+                    <label class="label">
+                        <span class="label-text">节点</span>
+                    </label>
+                    <select class="select select-bordered select-primary w-full" v-model="set.api">
+                        <option v-for="(v,k) in apis" :value="k">{{k}}</option>
+                    </select>
+                </div>
+                <div class="card-actions mt-4">
+                    <button class="btn btn-primary flex-1" @click="download">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M17 13l-5 5m0 0l-5-5m5 5V6"/>
+                        </svg>
+                        下载
+                    </button>
+                    <button class="btn btn-primary flex-1" @click="copy">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                        </svg>
+                        复制
+                    </button>
+                    <button class="btn btn-primary flex-1" @click="reset">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                  d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                                  clip-rule="evenodd"/>
+                        </svg>
+                        清空
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{literal}
+<script>
+    var vm = new Vue({
+        el: '#app',
+        data: {
+            set: {
+                input: '',
+                output: '',
+                api: 'jsdelivr.net',
+            },
+            apis: {
+                'jsdelivr.net': (github) => {
+                    if (github.version === 'archive') {
+                        return 'https://ghproxy.com/' + github.url.toString()
+                    }
+                    return `https://cdn.jsdelivr.net/gh/${github.owner}/${github.repo}@${github.version}/${github.file}`
+                },
+                'ghproxy.com': (github) => {
+                    return 'https://ghproxy.com/' + github.url.toString()
+                },
+                'ghproxy.fsou.cc': (github) => {
+                    return 'https://ghproxy.fsou.cc/' + github.url.toString()
+                },
+                'fastgit.org': (github) => {
+                    if (github.version === 'archive') {
+                        return `https://download.fastgit.org/${github.owner}/${github.repo}/${github.version}/${github.file}`
+                    }
+                    return `https://raw.fastgit.org/${github.owner}/${github.repo}/${github.version}/${github.file}`
+                },
+                'staticaly.com': (github) => {
+                    if (github.version === 'archive'){
+                        return 'https://ghproxy.com/' + github.url.toString()
+                    }
+                    return `https://cdn.staticaly.com/gh/${github.owner}/${github.repo}/${github.version}/${github.file}`
+                },
+
+            },
+        },
+        watch: {
+            'set.input'(newVal){
+                this.set.input = newVal.trim()
+            }
+        },
+        methods: {
+            download() {
+                this.set.output = this.apis[this.set.api](this.parse(this.set.input))
+                open(this.set.output)
+            },
+            reset() {
+                this.set.input = ''
+                this.set.output = ''
+            },
+            copy() {
+                this.set.output = this.apis[this.set.api](this.parse(this.set.input))
+                copy(this.set.output)
+                $message.success('复制成功')
+            },
+            parse(url) {
+                if (!url.match(/http(s)?:\/\//)) {
+                    url = 'https://' + url
+                }
+                let ins = new URL(url);
+                let split = ins.pathname.split('/');
+                return {
+                    url: ins,
+                    owner: split[1],
+                    repo: split[2],
+                    version: split[3],
+                    file: split.slice(4).join('/'),
+                }
+
+            }
+        },
+    })
+
+</script>
+{/literal}
+{/block}

@@ -22,6 +22,7 @@
         ├─emoji
         ├─example
         ├─file_hash
+        ├─github_proxy
         ├─hash
         ├─image2base64
         ├─image_url
