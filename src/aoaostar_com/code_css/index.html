@@ -1,0 +1,98 @@
+{extend name="layout/plugin_layout" /}
+﻿
+{block name="title"}{$plugin.title} - {$app.title}{/block}
+{block name="head"}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.0/lib/codemirror.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.0/theme/mdn-like.min.css">
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.0/lib/codemirror.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-beautify@1.14.0/js/lib/beautifier.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/csso@5.0.2/dist/csso.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.0/mode/css/css.min.js"></script>
+<style>
+    .CodeMirror {
+        border: 1px solid #eee;
+        height: 70vh;
+    }
+</style>
+{/block}
+{block name="main"}
+<div class="container mx-auto" id="app">
+    <div class="card lg:card-side bordered shadow-lg">
+        <div class="card-body overflow-auto">
+            <div class="main">
+                <div class="form-control text-base">
+                    <label class="label">
+                        <span class="label-text">代码</span>
+                    </label>
+                    <textarea id="code" v-model="set.input" class="textarea textarea-bordered "></textarea>
+                </div>
+                <div class="card-actions mt-4">
+                    <button class="btn btn-primary flex-1" @click="format">
+                        格式化
+                    </button>
+                    <button class="btn btn-primary flex-1" @click="compress">
+                        压缩
+                    </button>
+                    <button class="btn btn-primary flex-1" @click="reset">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                  d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                                  clip-rule="evenodd"/>
+                        </svg>
+                        清空
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    new Vue({
+        el: '#app',
+        data: {
+            set: {
+                input: `body {
+    border: 1px solid #eee;
+    height: 100%;
+    color: #fff;
+    /*background-color: skyblue;*/
+}`,
+                codemirror: null,
+            },
+        },
+        created() {
+        },
+        mounted() {
+            this.codemirror = CodeMirror.fromTextArea(document.getElementById("code"), {  // 标识到textarea
+                value: this.set.input,  // 文本域默认显示的文本
+                mode: {name: "css"},  // 模式
+                theme: "mdn-like",  // CSS样式选择
+                indentUnit: 2,  // 缩进单位，默认2
+                smartIndent: true,  // 是否智能缩进
+                tabSize: 4,  // Tab缩进，默认4
+                readOnly: false,  // 是否只读，默认false
+                showCursorWhenSelecting: true,
+                lineNumbers: true,  // 是否显示行号
+                lineWrapping: true,
+                matchBrackets: true,
+            });
+        },
+        methods: {
+            format() {
+                this.codemirror.setValue(beautifier.css(this.codemirror.getValue()));
+            },
+            compress() {
+                this.codemirror.setValue(csso.minify(this.codemirror.getValue()).css);
+            },
+            reset() {
+                this.set.input = ''
+                this.codemirror.setValue('');
+
+            },
+        },
+    })
+
+</script>
+
+{/block}

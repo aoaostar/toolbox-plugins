@@ -1,0 +1,142 @@
+{extend name="layout/plugin_layout" /}
+﻿
+{block name="title"}{$plugin.title} - {$app.title}{/block}
+{block name="head"}
+<script src="https://cdn.jsdelivr.net/npm/markdown-it@12.3.2/dist/markdown-it.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.4.0/styles/github-dark-dimmed.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.4.0/build/highlight.min.js"></script>
+<style>
+    h1, h2, h5, h3, h4, h5, h6 {
+        font-weight: bolder
+    }
+
+    h1 {
+        font-size: 2em;
+        margin: .67em 0
+    }
+
+    h2 {
+        font-size: 1.5em;
+        margin: .75em 0
+    }
+
+    h3 {
+        font-size: 1.17em;
+        margin: .83em 0
+    }
+
+    h4 {
+        margin: 1.12em 0
+    }
+
+    h5 {
+        font-size: .83em;
+        margin: 1.5em 0
+    }
+
+    h6 {
+        font-size: .75em;
+        margin: 1.67em 0
+    }
+</style>
+{/block}
+
+{block name="main"}
+<div class="container mx-auto" id="app">
+    <div class="card lg:card-side bordered shadow-lg">
+        <div class="card-body overflow-auto">
+            <div class="main">
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">command</span>
+                    </label>
+                    <input type="text" v-model="set.input" placeholder="alias" class="input input-bordered">
+                </div>
+                <div class="overflow-x-auto mt-4" v-show="set.input">
+                    <div class="font-bold">搜索结果（点击查看详情）</div>
+                    <table class="table w-full  mt-4">
+                        <thead>
+                        <tr>
+                            <th>Command</th>
+                            <th>Description</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr class="cursor-pointer hover" v-for="item in set.output" @click="preview(item)">
+                            <td>{{commands[item].n}}</td>
+                            <td>{{commands[item].d}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var md = window.markdownit({
+        highlight: function (str, lang) {
+            if (lang && hljs.getLanguage(lang)) {
+                try {
+                    return '<pre class="hljs p-4"><code>' +
+                        hljs.highlight(str, { language: lang, ignoreIllegals: true }).value +
+                        '</code></pre>';
+                } catch (__) {}
+            }
+            return '<pre class="hljs p-4"><code>' + md.utils.escapeHtml(str) + '</code></pre>';
+        },
+        typographer: true,
+        html: true,
+    });
+    new Vue({
+        el: '#app',
+        data: {
+            commands: {},
+            set: {
+                input: '',
+                output: [],
+            }
+        },
+        created() {
+            this.getData()
+        },
+        watch: {
+            'set.input'() {
+
+                this.set.output = Object.keys(this.commands).filter(command => {
+                    return (
+                        this.commands[command].n.toString().toLowerCase().indexOf(this.set.input.toLowerCase()) >= 0
+                    )
+                })
+            }
+        },
+        methods: {
+            getData() {
+                request('https://cdn.jsdelivr.net/npm/linux-command@1.8.2/dist/data.json').then(res => {
+                    this.commands = res.data
+                }).catch(e => {
+                    $message.error(`获取数据失败，请刷新页面重试 ${e}`)
+                })
+            },
+            preview(command) {
+                let loading = $message.loading('正在加载中');
+                request(
+                    `https://cdn.jsdelivr.net/npm/linux-command/command/${command}.md`).then(res => {
+                    let result = md.render(res.data);
+                    Swal.fire({
+                        html: `<div class="text-left">${result}</div>`,
+                        showCloseButton: true,
+                        showConfirmButton: false,
+                        width: '100%',
+                    })
+                }).catch(e => {
+                    $message.error(`获取数据失败，请重试 ${e}`)
+                }).finally(()=>{
+                    loading.close()
+                })
+            }
+        },
+    })
+</script>
+
+{/block}

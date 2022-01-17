@@ -1,0 +1,53 @@
+{extend name="layout/plugin_layout" /}
+﻿
+{block name="title"}{$plugin.title} - {$app.title}{/block}
+{block name="head"}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/editor.md@1.5.0/css/editormd.min.css">
+{/block}
+﻿
+﻿
+{block name="main"}
+<div class="container mx-auto" id="app">
+    <div class="card lg:card-side bordered shadow-lg">
+        <div id="editor">
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/editor.md@1.5.0/editormd.min.js"></script>
+<script>
+    $(function () {
+        var editor = editormd("editor", {
+            width: "100%",
+            height: "600px",
+            path   : "https://cdn.jsdelivr.net/npm/editor.md@1.5.0/lib/",
+            // theme : "dark",
+            // previewTheme : "dark",
+            // editorTheme : "pastel-on-dark",
+            markdown : '## Hello World',
+            codeFold: true,
+            //syncScrolling : false,
+            saveHTMLToTextarea: true,    // 保存 HTML 到 Textarea
+            searchReplace: true,
+            //watch : false,                // 关闭实时预览
+            htmlDecode: "style,script,iframe|on*",            // 开启 HTML 标签解析，为了安全性，默认不开启
+            //toolbar  : false,             //关闭工具栏
+            //previewCodeHighlight : false, // 关闭预览 HTML 的代码块高亮，默认开启
+            emoji: true,
+            taskList: true,
+            tocm: true,         // Using [TOCM]
+            tex: true,                   // 开启科学公式TeX语言支持，默认关闭
+            flowChart: true,             // 开启流程图支持，默认关闭
+            sequenceDiagram: true,       // 开启时序/序列图支持，默认关闭,
+        });
+    });
+    new Vue({
+        el: '#app',
+        data: {},
+        created() {
+        },
+        methods: {},
+    })
+</script>
+
+{/block}

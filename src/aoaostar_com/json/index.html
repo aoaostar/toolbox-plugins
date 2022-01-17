@@ -1,0 +1,108 @@
+{extend name="layout/plugin_layout" /}
+﻿
+{block name="title"}{$plugin.title} - {$app.title}{/block}
+{block name="head"}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsoneditor@9.6.0/dist/jsoneditor.min.css">
+<script src="https://cdn.jsdelivr.net/npm/jsoneditor@9.6.0/dist/jsoneditor.min.js"></script>
+<style>
+    .jsoneditor-poweredBy {
+        display: none;
+    }
+
+    .jsoneditor-menu {
+        background-color: #535c68;
+        border-bottom: 1px solid #535c68;
+    }
+
+    .jsoneditor {
+
+        border: thin solid #535c68;
+    }
+
+    .jsoneditor-modal .pico-modal-header {
+        background: #535c68;
+    }
+
+    .jsoneditor-modal .jsoneditor-jmespath-label {
+
+        color: #000;
+    }
+
+    .jsoneditor {
+        height: 70vh;
+    }
+</style>
+{/block}
+{block name="main"}
+<div class="container mx-auto" id="app">
+    <div class="card lg:card-side bordered shadow-lg">
+        <div class="card-body overflow-auto">
+            <div class="main flex flex-col xl:flex-row">
+                <div id="editor" class="flex-1"></div>
+                <div id="view" class="flex-1"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var editor = {
+        view: {
+            container: 'view',
+            editor: null,
+            opts: {
+                mode: 'code',
+                navigationBar: true,
+                mainMenuBar: true,
+                statusBar: true,
+                colorPicker: true,
+                modes: ['code', 'tree', 'view', 'form', 'text', 'preview'],
+                onChangeText(data) {
+                    editor.edit.editor.setText(data)
+                },
+            }
+        },
+        edit: {
+            container: 'editor',
+            editor: null,
+            opts: {
+                mode: 'text',
+                onChangeText(data) {
+                    editor.view.editor.setText(data)
+                }
+            }
+        },
+    };
+    new Vue({
+        el: '#app',
+        data: {
+            set: {
+                input: {
+                    "Array": [1, 2, 3],
+                    "Boolean": true,
+                    "Null": null,
+                    "Number": 123,
+                    "Object": {"a": "b", "c": "d"},
+                    "String": "Hello World"
+                },
+            },
+        },
+        watch: {
+            'set.input'(newVal) {
+            }
+        },
+        mounted() {
+            editor.view.editor = new JSONEditor(document.getElementById(editor.view.container), editor.view.opts)
+            editor.edit.editor = new JSONEditor(document.getElementById(editor.edit.container), editor.edit.opts)
+            editor.view.editor.set(this.set.input)
+            editor.edit.editor.set(this.set.input)
+        },
+        methods: {
+            reset() {
+                this.set.input = ''
+            },
+        },
+    })
+
+</script>
+
+{/block}

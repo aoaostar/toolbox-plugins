@@ -1,0 +1,143 @@
+{extend name="layout/plugin_layout" /}
+﻿
+{block name="title"}{$plugin.title} - {$app.title}{/block}
+{block name="head"}
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.0/build/qrcode.js"></script>
+{/block}
+{block name="main"}
+<div class="container mx-auto" id="app">
+    <div class="card lg:card-side bordered shadow-lg">
+        <div class="card-body overflow-auto">
+            <div class="main">
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">内容</span>
+                    </label>
+                    <textarea v-model="set.input" class="textarea textarea-bordered  h-64"></textarea>
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">大小（像素）</span>
+                    </label>
+                    <input type="number" v-model="set.width" class="input input-bordered">
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">边距大小（像素）</span>
+                    </label>
+                    <input type="number" v-model="set.margin" class="input input-bordered">
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">最小块大小（像素）</span>
+                    </label>
+                    <input type="number" v-model="set.scale" class="input input-bordered">
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">容错级别</span>
+                    </label>
+                    <select class="select select-bordered w-full max-w-xs" v-model="set.errorCorrectionLevel">
+                        <option>low</option>
+                        <option>medium</option>
+                        <option>quartile</option>
+                        <option>high</option>
+                    </select>
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">前景色（{{set.color.dark}}）</span>
+                    </label>
+                    <input type="color" v-model="set.color.dark" class="input input-bordered">
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">背景色（{{set.color.light}}）</span>
+                    </label>
+                    <input type="color" v-model="set.color.light" class="input input-bordered">
+                </div>
+                <div class="card-actions mt-4">
+                    <button class="btn btn-primary flex-1" @click="generate">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M17 13l-5 5m0 0l-5-5m5 5V6"/>
+                        </svg>
+                        生成
+                    </button>
+                    <button class="btn btn-primary flex-1" @click="reset">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                  d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                                  clip-rule="evenodd"/>
+                        </svg>
+                        清空
+                    </button>
+                </div>
+                <div class="card shadow mt-4" v-show="set.output">
+                    <div class="card-body block">
+                        <img class="mx-auto shadow" :src="set.output" id="qrcode"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    new Vue({
+        el: '#app',
+        data: {
+            set: {
+                input: window.location.href,
+                errorCorrectionLevel: 'high',//low, medium, quartile, high
+                type: 'image/png',
+                quality: 1,
+                scale: 4,
+                margin: 1,
+                width: 256,
+                color: {
+                    dark: "#000000",
+                    light: "#ffffff"
+                },
+                output: '',
+            },
+        },
+        created() {
+        },
+        watch: {
+            'set': {
+                handler() {
+                    if (this.set.input !== '') {
+                        this.generate()
+                    }
+                },
+                deep: true
+            }
+        },
+        mounted() {
+            this.generate()
+        },
+        methods: {
+            generate() {
+                if (this.set.input === '') {
+                    $message.error('请输入内容')
+                    return
+                }
+                let that = this
+                QRCode.toDataURL(this.set.input, this.set, function (err, url) {
+                    if (err) throw err
+                    that.set.output = url
+                })
+            },
+            reset() {
+                this.set.input = ''
+                this.set.output = ''
+
+            },
+        },
+    })
+
+</script>
+
+{/block}
