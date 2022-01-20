@@ -2,14 +2,15 @@
 ﻿
 {block name="title"}{$plugin.title} - {$app.title}{/block}
 {block name="head"}
-<script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.js"></script>
+<script>
+    var core_values={_core_values:"富强民主文明和谐自由平等公正法治爱国敬业诚信友善",_assert:function(){for(var r=arguments.length,t=Array(r),e=0;e<r;e++)t[e]=arguments[e];var n=t.length,o="string"==typeof t[n-1]?t[n-1]:"Assert Error",u=!0,a=!1,s=void 0;try{for(var i,h=t[Symbol.iterator]();!(u=(i=h.next()).done);u=!0){var f=i.value;if(!f)throw new Error(o)}}catch(r){a=!0,s=r}finally{try{!u&&h.return&&h.return()}finally{if(a)throw s}}},_randBin:function(){return Math.random()>=.5},_str2utf8:function(r){var t=r.replace(/[A-Za-z0-9\-\_\.\!\~\*\'\(\)]/g,(function(r){return r.codePointAt(0).toString(16)}));return encodeURIComponent(t).replace(/%/g,"").toUpperCase()},_utf82str:function(r){this._assert("string"==typeof r,"utfs Error");var t=r.length;this._assert(0==(1&t));for(var e=[],n=0;n<t;n++)0==(1&n)&&e.push("%"),e.push(r[n]);return decodeURIComponent(e.join(""))},_hex2duo:function(r){this._assert("string"==typeof r);var t=[],e=!0,n=!1,o=void 0;try{for(var u,a=r[Symbol.iterator]();!(e=(u=a.next()).done);e=!0){var s=u.value,i=Number.parseInt(s,16);i<10?t.push(i):this._randBin()?(t.push(10),t.push(i-10)):(t.push(11),t.push(i-6))}}catch(r){n=!0,o=r}finally{try{!e&&a.return&&a.return()}finally{if(n)throw o}}return t},_duo2hex:function(r){this._assert(r instanceof Array);for(var t=[],e=r.length,n=0;n<e;)r[n]<10?t.push(r[n]):10===r[n]?(n++,t.push(r[n]+10)):(n++,t.push(r[n]+6)),n++;return t.map((function(r){return r.toString(16).toUpperCase()})).join("")},_duo2values:function(r){let t=this;return r.map((function(r){return t._core_values[2*r]+t._core_values[2*r+1]})).join("")},encode:function(r){return this._duo2values(this._hex2duo(this._str2utf8(r)))},decode:function(r){var t=[],e=!0,n=!1,o=void 0;try{for(var u,a=r[Symbol.iterator]();!(e=(u=a.next()).done);e=!0){var s=u.value,i=this._core_values.indexOf(s);-1!==i&&(1&i||t.push(i>>1))}}catch(r){n=!0,o=r}finally{try{!e&&a.return&&a.return()}finally{if(n)throw o}}var h=this._duo2hex(t);this._assert(0==(1&h.length));var f=void 0;try{f=this._utf82str(h)}catch(r){throw r}return f}};
+</script>
 {/block}
 {block name="main"}
 <div class="container mx-auto" id="app">
     <div class="card lg:card-side bordered shadow-lg">
         <div class="card-body overflow-auto">
             <div class="main">
-
                 <div class="form-control">
                     <label class="label">
                         <span class="label-text">字符串</span>
@@ -67,15 +68,14 @@
         methods: {
             encode() {
                 try {
-                    const wordArray = CryptoJS.enc.Utf8.parse(this.set.input);
-                    this.set.output = CryptoJS.enc.Base64.stringify(wordArray);
+                    this.set.output = core_values.encode(this.set.input)
                 } catch (e) {
                     $message.error(e.message)
                 }
             },
             decode() {
                 try {
-                    this.set.input = CryptoJS.enc.Base64.parse(this.set.output).toString(CryptoJS.enc.Utf8);
+                    this.set.input = core_values.decode(this.set.output)
                 } catch (e) {
                     $message.error(e.message)
                 }

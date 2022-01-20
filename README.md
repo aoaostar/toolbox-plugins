@@ -22,6 +22,7 @@
         ├─code_css
         ├─code_html
         ├─code_js
+        ├─core_values
         ├─emoji
         ├─example
         ├─file_hash
@@ -38,11 +39,16 @@
         ├─json
         ├─linux_command
         ├─markdown
+        ├─mime_type
         ├─ps
         ├─qrcode
         ├─random_anime_images
         ├─random_beauty_images
         ├─rand_password
+        ├─roll_call
+        ├─short_url
+        │  └─api
+        ├─special_symbols
         ├─str_count
         ├─timestamp
         ├─urlencode

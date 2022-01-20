@@ -1,0 +1,124 @@
+{extend name="layout/plugin_layout" /}
+﻿
+{block name="title"}{$plugin.title} - {$app.title}{/block}
+{block name="head"}
+{/block}
+{block name="main"}
+<div class="container mx-auto" id="app">
+    <div class="card lg:card-side bordered shadow-lg">
+        <div class="card-body">
+            <div class="alert">
+                <div class="flex-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#2196f3"
+                         class="w-6 h-6 mx-2">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <label>介于很多接口太不禁++，所以有许多的链接的请一个一个来</label>
+                </div>
+            </div>
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text">前缀</span>
+                </label>
+                <select class="select select-bordered w-full max-w-xs" v-model="set.api">
+                    <option v-for="api in set.apis" :value="api.value" :disabled="api.disabled">{{api.title}}</option>
+                </select>
+            </div>
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text">长链接</span>
+                </label>
+                <input type="text" v-model="set.input" placeholder="请输入长链接" class="input input-bordered">
+            </div>
+            <div class="card-actions mt-4">
+                <button class="btn btn-primary btn-block" @click="generate">生成</button>
+            </div>
+            <div class="form-control" v-show="set.output">
+                <label class="label">
+                    <span class="label-text">结果</span>
+                </label>
+                <textarea v-model="set.output" class="textarea textarea-bordered  h-48"></textarea>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            set: {
+                input: '',
+                output: '',
+                api: 'is_gd',
+                apis: [
+                    {
+                        title: 'is.gd',
+                        value: 'is_gd',
+                        disabled: false,
+                    },
+                    {
+                        title: 'zm.cx',
+                        value: 'zm_cx',
+                        disabled: false,
+                    },
+                    {
+                        title: 'tinyurl.com',
+                        value: 'tinyurl_com',
+                        disabled: false,
+                    },
+                    {
+                        title: 'suo.yt',
+                        value: 'suo_yt',
+                        disabled: false,
+                    },
+                    {
+                        title: 'dwz.tax',
+                        value: 'dwz_tax',
+                        disabled: false,
+                    },
+                    {
+                        title: 'lnks.tools',
+                        value: 'lnks_tools',
+                        disabled: false,
+                    },
+                    {
+                        title: 'd.naccl.top',
+                        value: 'd_naccl_top',
+                        disabled: false,
+                    },
+                    {
+                        title: 'moelink.org',
+                        value: 'moelink_org',
+                        disabled: false,
+                    },
+                ]
+            },
+        },
+        created() {
+        },
+        methods: {
+            generate() {
+                if (this.set.input === '') {
+                    $message.error('请输入url')
+                    return
+                }
+                const loading = $message.loading('正在生成中');
+
+                return httpPost('/api/{$plugin.alias}/generate', {
+                    type: this.set.api,
+                    url: this.set.input,
+                }).then(res => {
+                    if (res.status === 'ok') {
+                        this.set.output = res.data.short_url
+                        $message.success('生成成功')
+                    }
+                }).finally(loading.close)
+            },
+        },
+    })
+
+</script>
+
+{/block}

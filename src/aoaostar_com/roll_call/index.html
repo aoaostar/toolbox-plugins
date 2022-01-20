@@ -1,0 +1,139 @@
+{extend name="layout/plugin_layout" /}
+﻿
+{block name="title"}{$plugin.title} - {$app.title}{/block}
+﻿
+{block name="main"}
+<div class="container mx-auto" id="app">
+    <div class="card lg:card-side bordered shadow-lg">
+        <div class="card-body">
+
+            <div class="shadow card" v-show="output">
+                <div class="card-body">
+                    <div class="font-bold text-7xl text-center">
+                        {{output}}
+                    </div>
+                </div>
+            </div>
+            <div class="card-actions mt-4">
+                <button class="btn btn-primary flex-auto" @click="input_text">
+                    设置名单
+                </button>
+                <button class="btn btn-primary flex-auto" @click="start">
+                    {{status?'停止':'开始'}}
+                </button>
+                <button class="btn btn-primary flex-auto" @click="for_instance">
+                    举个例子
+                </button>
+                <button class="btn btn-primary flex-auto" @click="show=!show">
+                    显示/隐藏详情
+                </button>
+                <button class="btn btn-primary flex-auto" @click="reset">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    清空
+                </button>
+                <button class="btn btn-ghost flex-auto" @click="allow_repeat=!allow_repeat">
+                    允许重复&nbsp;&nbsp;
+                    <input type="checkbox" checked="checked" class="toggle" v-model="allow_repeat">
+                </button>
+            </div>
+            <div v-show="show && list.length>0" class="mt-4">
+                <div v-show="called.length>0">
+                    <div class="font-bold">已点名单：</div>
+                    <ul class="">
+                        <li class="inline-block border px-4 py-2 m-2 cursor-pointer" v-for="item in called">{{item}}
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <div class="font-bold">待点名列表：</div>
+                    <ul class="">
+                        <li class="inline-block border px-4 py-2 m-2 cursor-pointer" v-for="item in list">{{item}}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            output: '',
+            allow_repeat: false,
+            list: [],
+            called: [],
+            status: false,
+            timer: null,
+            show: true,
+        },
+        created() {
+            let set = JSON.parse(localStorage.getItem("{$plugin.alias}_set") || '{}');
+            this.list = set.list || [];
+            this.called = set.called || [];
+            this.allow_repeat = set.allow_repeat || false;
+            this.output = set.output || '';
+            if (!this.list || this.list.length <= 0) {
+                this.for_instance()
+            }
+        },
+        methods: {
+            save() {
+                localStorage.setItem("{$plugin.alias}_set", JSON.stringify({
+                    list: this.list,
+                    called: this.called,
+                    output: this.output,
+                    allow_repeat: this.allow_repeat,
+                }));
+            },
+            start() {
+                if (this.status) {
+                    this.called.push(this.output)
+                    if (!this.allow_repeat) {
+                        this.list.splice(this.list.indexOf(this.output), 1)
+                    }
+                    clearInterval(this.timer)
+                    this.status = !this.status
+                    this.save()
+                    return
+                }
+                this.status = !this.status
+                let that = this
+                this.timer = setInterval(() => {
+                    that.output = that.list[Math.floor(Math.random() * that.list.length)]
+                }, 100)
+
+            },
+            reset() {
+                this.list = this.called = [];
+                this.output = '';
+                this.save()
+            },
+            for_instance() {
+                this.list = ['暃', '金蝉', '云缨', '艾琳', '司空震', '澜', '夏洛特', '阿古朵', '蒙恬', '镜', '蒙犽', '鲁班大师', '西施', '马超', '曜', '云中君', '瑶', '盘古', '猪八戒', '嫦娥', '上官婉儿', '李信', '沈梦溪', '伽罗', '盾山', '司马懿', '孙策', '元歌', '米莱狄', '狂铁', '弈星', '裴擒虎', '杨玉环', '公孙离', '明世隐', '女娲', '梦奇', '苏烈', '百里玄策', '百里守约', '铠', '鬼谷子', '干将莫邪', '东皇太一', '大乔', '黄忠', '诸葛亮', '哪吒', '太乙真人', '蔡文姬', '雅典娜', '杨戬', '成吉思汗', '钟馗', '虞姬', '李元芳', '张飞', '刘备', '后羿', '牛魔', '孙悟空', '亚瑟', '橘右京', '娜可露露', '不知火舞', '张良', '花木兰', '兰陵王', '王昭君', '韩信', '刘邦', '姜子牙', '露娜', '程咬金', '安琪拉', '貂蝉', '关羽', '老夫子', '武则天', '项羽', '达摩', '狄仁杰', '马可波罗', '李白', '宫本武藏', '典韦', '曹操', '甄姬', '夏侯惇', '周瑜', '吕布', '芈月', '白起', '扁鹊', '孙膑', '钟无艳', '阿轲', '高渐离', '刘禅', '庄周', '鲁班七号', '孙尚香', '嬴政', '妲己', '墨子', '赵云', '小乔', '廉颇',]
+                this.save()
+            },
+            async input_text() {
+                const {value: text} = await Swal.fire({
+                    input: 'textarea',
+                    inputLabel: '每行一个',
+                    showCancelButton: true
+                })
+                let split = text.split('\n'), arr = [];
+                for (const k in split) {
+                    if (split[k].trim()) {
+                        arr.push(split[k].trim())
+                    }
+                }
+                this.list = [...(new Set(arr))]
+                this.save()
+            }
+        },
+    })
+</script>
+
+{/block}
