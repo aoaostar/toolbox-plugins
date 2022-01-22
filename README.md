@@ -36,10 +36,12 @@
         │      ├─bkimg
         │      ├─qq
         │      └─telegraph
+        ├─ip
         ├─json
         ├─linux_command
         ├─markdown
         ├─mime_type
+        ├─piano
         ├─ps
         ├─qrcode
         ├─random_anime_images

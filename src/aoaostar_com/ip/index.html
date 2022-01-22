@@ -1,0 +1,121 @@
+{extend name="layout/plugin_layout" /}
+﻿
+{block name="title"}{$plugin.title} - {$app.title}{/block}
+{block name="head"}
+<style>
+    .stats .stat {
+        border-width: 1px;
+        margin-top: -1px;
+        margin-bottom: -1px;
+    }
+</style>
+{/block}
+{block name="main"}
+<div class="container mx-auto" id="app">
+    <div class="card lg:card-side bordered shadow-lg">
+        <div class="card-body overflow-auto">
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text">IP</span>
+                </label>
+                <input type="text" v-model="set.input" class="input input-bordered">
+            </div>
+            <button class="btn btn-primary my-4" @click="query">查询</button>
+            <div class="main">
+                <div class="w-full shadow stats grid-flow-row grid-cols-1 lg:grid-flow-col lg:grid-cols-none mt-4">
+                    <div class="stat place-items-center place-content-center col-span-full lg:col-auto">
+                        <div class="stat-title">境内</div>
+                        <div class="stat-value">{{set.output.cn.ip}}</div>
+                        <div class="stat-desc">{{set.output.cn.location}}</div>
+                    </div>
+                    <div class="stat place-items-center place-content-center">
+                        <div class="stat-title">境外</div>
+                        <div class="stat-value">{{set.output.abroad.ip}}</div>
+                        <div class="stat-desc">{{set.output.abroad.location}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var ip_check = {
+        query: (ip) => {
+            return httpGet(`/api/{$plugin.alias}/query?ip=${ip}`)
+        },
+        cn: () => {
+            return request('https://myip.ipip.net/json').then(res => {
+                let data = res.data
+                return {
+                    ip: data.data.ip,
+                    location: data.data.location.join(" "),
+                }
+            })
+        },
+        abroad: () => {
+            return request('https://ipinfo.io/json').then(res => {
+                let data = res.data
+                return {
+                    ip: data.ip,
+                    location: data.country + " " + data.org,
+                }
+            })
+        },
+    }
+    new Vue({
+        el: '#app',
+        data: {
+            set: {
+                input: '',
+                output: {
+                    cn: '',
+                    abroad: '',
+                },
+            },
+        },
+        created() {
+            this.calculate()
+        },
+        methods: {
+            query() {
+                const loading = $message.loading("正在加载中");
+                try {
+                    ip_check.query(this.set.input).then(res => {
+                        if (res.status === 'ok') {
+                            this.set.output.cn = {
+                                ip: res.data.ip,
+                                location: res.data.location,
+                            }
+                        }
+                    })
+                } catch (e) {
+                    $message.error(e.message)
+                } finally {
+                    loading.close()
+                }
+            },
+            calculate() {
+                const loading = $message.loading("正在加载中");
+                Promise.all([
+                    ip_check.cn(),
+                    ip_check.abroad(),
+                ]).then(res => {
+                    this.set.input = res[0].ip
+                    this.set.output = {
+                        cn: res[0],
+                        abroad: res[1],
+                    }
+                }).finally(() => loading.close())
+            },
+            reset() {
+                this.set.input = ''
+                this.set.output = ''
+
+            },
+        },
+    })
+
+</script>
+
+{/block}
