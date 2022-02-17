@@ -1,6 +1,6 @@
 <?php
 
-namespace plugin\aoaostar_com\ip;
+namespace plugin\aoaostar_com\alipay_arrival;
 
 
 use app\model\Plugin;
@@ -10,11 +10,11 @@ class Install implements \plugin\Install
 
     public function Install(Plugin $model)
     {
-        $model->title = 'IP查询';
+        $model->title = '支付宝到账语音';
         $model->class = plugin_current_class_get(__NAMESPACE__);
         $model->alias = base_space_name(__NAMESPACE__);
-        $model->desc = '全方位查询你的IP信息';
-        $model->version = 'v1.1';
+        $model->desc = '在线生成支付宝到账音效，输入金额，即刻到账！';
+        $model->version = 'v1.0';
     }
 
     public function UnInstall(Plugin $model)

@@ -150,15 +150,20 @@ function file_to_base64($filepath): string
  * @param null $url
  * @return bool
  */
-function is_valid_url($url = null)
-{
-    if (empty($url)) return false;
-    if (!is_string($url)) return false;
-    $filter_var = boolval(filter_var($url, FILTER_VALIDATE_URL));
-    if ($filter_var) return $filter_var;
-    $parse_url = parse_url($url);
-    $path = array_pop($parse_url);
 
-    $url = str_ireplace($path, '/' . urlencode($path), $url);
-    return boolval(filter_var($url, FILTER_VALIDATE_URL));
+if (!function_exists('is_valid_url')) {
+
+    function is_valid_url($url = null)
+    {
+        if (empty($url)) return false;
+        if (!is_string($url)) return false;
+        $filter_var = boolval(filter_var($url, FILTER_VALIDATE_URL));
+        if ($filter_var) return $filter_var;
+        $parse_url = parse_url($url);
+        $path = array_pop($parse_url);
+
+        $url = str_ireplace($path, '/' . urlencode($path), $url);
+        return boolval(filter_var($url, FILTER_VALIDATE_URL));
+    }
+
 }

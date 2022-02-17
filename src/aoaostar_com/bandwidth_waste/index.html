@@ -128,10 +128,9 @@
                             Promise.all(task).finally(resolve)
                         })
                     } while (this.set.status && this.set.infinite)
-                    this.set.status = false
                 } else {
+                    clearInterval(this.timer)
                     this.cancelSource.cancel()
-                    setTimeout(() => clearInterval(this.timer), 1000)
                 }
             }
         },
@@ -169,7 +168,7 @@
                     delete that.tasks[index]
                 })
             },
-            secToTime: (s) => {
+            secToTime(s) {
                 let t = '';
                 if (s > -1) {
                     let hour = Math.floor(s / 3600)
