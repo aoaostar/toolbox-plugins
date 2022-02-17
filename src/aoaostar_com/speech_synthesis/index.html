@@ -91,15 +91,20 @@
         },
         methods: {
             play() {
-                const utterThis = new SpeechSynthesisUtterance(this.set.input);
-                this.set.voices.forEach(value => {
-                    if (this.set.voice === value.name) {
-                        utterThis.voice = value;
-                    }
-                })
-                utterThis.pitch = this.set.pitch;
-                utterThis.rate = this.set.rate;
-                this.synth.speak(utterThis);
+                try{
+                    const utterThis = new SpeechSynthesisUtterance(this.set.input);
+                    this.set.voices.forEach(value => {
+                        if (this.set.voice === value.name) {
+                            utterThis.voice = value;
+                        }
+                    })
+                    utterThis.pitch = this.set.pitch;
+                    utterThis.rate = this.set.rate;
+                    this.synth.cancel()
+                    this.synth.speak(utterThis);
+                }catch (e) {
+                    $message.error(e)
+                }
             },
             reset() {
                 this.set.input = ''

@@ -14,7 +14,7 @@ class Install implements \plugin\Install
         $model->class = plugin_current_class_get(__NAMESPACE__);
         $model->alias = base_space_name(__NAMESPACE__);
         $model->desc = '在线语音合成、文本转语音';
-        $model->version = 'v1.0';
+        $model->version = 'v1.1';
     }
 
     public function UnInstall(Plugin $model)
