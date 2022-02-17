@@ -44,14 +44,14 @@
         query: (ip) => {
             return httpGet(`/api/{$plugin.alias}/query?ip=${ip}`)
         },
-        cn: () => {
-            return request('https://myip.ipip.net/json').then(res => {
-                let data = res.data
-                return {
-                    ip: data.data.ip,
-                    location: data.data.location.join(" "),
-                }
-            })
+
+        cn: async () => {
+            return await request('https://ipv4.ipw.cn/api/ip/myip?json')
+                .then(res => {
+                    return ip_check.query(res.data.IP).then(res => {
+                        return res.data
+                    })
+                })
         },
         abroad: () => {
             return request('https://ipinfo.io/json').then(res => {
