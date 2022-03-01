@@ -1,0 +1,121 @@
+{extend name="layout/plugin_layout" /}
+{block name="title"}{$plugin.title} - {$app.title}{/block}
+{block name="head"}
+{/block}
+{block name="main"}
+<div class="container mx-auto" id="app">
+    <div class="card lg:card-side bordered shadow-lg">
+        <div class="card-body overflow-auto">
+            <div class="alert shadow-lg">
+                <div class="flex-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#2196f3"
+                         class="w-6 h-6 mx-2">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <label>输入学习标题和链接，点击生成按钮，复制结果链接在浏览器/微信浏览器打开，即可达到真实效果，(*￣︶￣)</label>
+                </div>
+            </div>
+            <div class="main">
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">标题</span>
+                    </label>
+                    <input type="text" v-model="set.input.title" class="input input-bordered input-primary">
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">链接</span>
+                    </label>
+                    <input type="text" v-model="set.input.url" class="input input-bordered input-primary">
+                </div>
+
+                <div class="card-actions mt-4">
+                    <button class="btn btn-primary flex-1" @click="generate">
+                        生成
+                    </button>
+                    <button class="btn btn-primary flex-1" @click="reset">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                  d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                                  clip-rule="evenodd"/>
+                        </svg>
+                        清空
+                    </button>
+                </div>
+                <div v-show="set.output.url" class="flex flex-col">
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">结果</span>
+                        </label>
+                        <input type="text" v-model="set.output.url" class="input input-bordered input-primary">
+                    </div>
+                    <div class="card-actions mt-4">
+                        <button class="btn btn-primary flex-1" @click="copy">
+                            复制
+                        </button>
+                        <button class="btn btn-primary flex-1" @click="open">
+                            新窗打开
+                        </button>
+                    </div>
+                    <div class="mt-4">
+                        <img class="w-full" :src="set.output.image"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{literal}
+<script>
+
+    new Vue({
+        el: '#app',
+        data: {
+            set: {
+                input: {
+                    title: '“青年大学习”第十三季第一期',
+                    url: 'https://h5.cyol.com/special/daxuexi/bf1avt2y7q/index.html',
+                },
+                output: {
+                    url: '',
+                    image: '',
+                },
+            },
+            crunker: null,
+        },
+        created() {
+
+        },
+        methods: {
+            generate() {
+                try {
+                    let url = new URL(this.set.input.url)
+                    let split = url.pathname.split('/');
+                    split[split.length - 1] = 'images/end.jpg'
+                    url.pathname = split.join('/')
+                    this.set.output.url = `${window.location.origin}/api${window.location.pathname}/s/?title=${encodeURIComponent(this.set.input.title)}&url=${encodeURIComponent(url)}`
+                    this.set.output.image = url
+
+                } catch (e) {
+                    $message.error('生成失败 ' + e.message)
+                }
+
+            },
+            reset() {
+                this.set.input.url = '';
+                this.set.output = '';
+            },
+            copy() {
+                copy(this.set.output.url)
+                $message.success('复制成功')
+            },
+            open() {
+                open(this.set.output.url)
+            }
+        },
+    })
+
+</script>
+{/literal}
+{/block}
