@@ -14,7 +14,7 @@ class Install implements \plugin\Install
         $model->class = plugin_current_class_get(__NAMESPACE__);
         $model->alias = base_space_name(__NAMESPACE__);
         $model->desc = '在线格式化解析JSON,在线格式化JSON,在线美化JSON';
-        $model->version = 'v1.0';
+        $model->version = 'v1.1';
     }
 
     public function UnInstall(Plugin $model)

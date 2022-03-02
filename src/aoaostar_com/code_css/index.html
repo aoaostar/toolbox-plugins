@@ -2,12 +2,12 @@
 ﻿
 {block name="title"}{$plugin.title} - {$app.title}{/block}
 {block name="head"}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.0/lib/codemirror.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.0/theme/mdn-like.min.css">
-<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.0/lib/codemirror.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/js-beautify@1.14.0/js/lib/beautifier.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/csso@5.0.2/dist/csso.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.0/mode/css/css.min.js"></script>
+<link rel="stylesheet" href="{:npm_cdn()}/codemirror@5.65.0/lib/codemirror.css">
+<link rel="stylesheet" href="{:npm_cdn()}/codemirror@5.65.0/theme/mdn-like.css">
+<script src="{:npm_cdn()}/codemirror@5.65.0/lib/codemirror.js"></script>
+<script src="{:npm_cdn()}/js-beautify@1.14.0/js/lib/beautifier.min.js"></script>
+<script src="{:npm_cdn()}/csso@5.0.2/dist/csso.js"></script>
+<script src="{:npm_cdn()}/codemirror@5.65.0/mode/css/css.js"></script>
 <style>
     .CodeMirror {
         border: 1px solid #eee;

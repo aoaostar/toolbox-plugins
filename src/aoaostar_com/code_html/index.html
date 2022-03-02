@@ -2,15 +2,15 @@
 ﻿
 {block name="title"}{$plugin.title} - {$app.title}{/block}
 {block name="head"}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.0/lib/codemirror.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.0/theme/mdn-like.min.css">
-<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.0/lib/codemirror.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/js-beautify@1.14.0/js/lib/beautifier.min.js"></script>
+<link rel="stylesheet" href="{:npm_cdn()}/codemirror@5.65.0/lib/codemirror.css">
+<link rel="stylesheet" href="{:npm_cdn()}/codemirror@5.65.0/theme/mdn-like.css">
+<script src="{:npm_cdn()}/codemirror@5.65.0/lib/codemirror.js"></script>
+<script src="{:npm_cdn()}/js-beautify@1.14.0/js/lib/beautifier.min.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.0/mode/xml/xml.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.0/mode/css/css.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.0/mode/javascript/javascript.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.0/mode/htmlmixed/htmlmixed.min.js"></script>
+<script src="{:npm_cdn()}/codemirror@5.65.0/mode/xml/xml.js"></script>
+<script src="{:npm_cdn()}/codemirror@5.65.0/mode/css/css.js"></script>
+<script src="{:npm_cdn()}/codemirror@5.65.0/mode/javascript/javascript.js"></script>
+<script src="{:npm_cdn()}/codemirror@5.65.0/mode/htmlmixed/htmlmixed.js"></script>
 
 <script src="https://cdn.jsdelivr.net/gh/kangax/html-minifier@4.0.0/dist/htmlminifier.min.js"></script>
 <style>

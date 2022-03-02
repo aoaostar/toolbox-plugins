@@ -2,7 +2,7 @@
 ﻿
 {block name="title"}{$plugin.title} - {$app.title}{/block}
 {block name="head"}
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.0/build/qrcode.js"></script>
+<script src="{:npm_cdn()}/qrcode@1.5.0/build/qrcode.js"></script>
 {/block}
 {block name="main"}
 <div class="container mx-auto" id="app">

@@ -2,9 +2,9 @@
 ﻿
 {block name="title"}{$plugin.title} - {$app.title}{/block}
 {block name="head"}
-<script src="https://cdn.jsdelivr.net/npm/markdown-it@12.3.2/dist/markdown-it.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.4.0/styles/github-dark-dimmed.min.css">
-<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.4.0/build/highlight.min.js"></script>
+<script src="{:npm_cdn()}/markdown-it@12.3.2/dist/markdown-it.min.js"></script>
+<link rel="stylesheet" href="{:cdnjs_cdn()}/highlight.js/11.4.0/styles/github-dark-dimmed.min.css">
+<script src="{:cdnjs_cdn()}/highlight.js/11.4.0/highlight.min.js"></script>
 <style>
     h1, h2, h5, h3, h4, h5, h6 {
         font-weight: bolder
@@ -112,7 +112,7 @@
         },
         methods: {
             getData() {
-                request('https://cdn.jsdelivr.net/npm/linux-command@1.8.2/dist/data.json').then(res => {
+                request('{:npm_cdn()}/linux-command@1.8.2/dist/data.json').then(res => {
                     this.commands = res.data
                 }).catch(e => {
                     $message.error(`获取数据失败，请刷新页面重试 ${e}`)
@@ -121,7 +121,7 @@
             preview(command) {
                 let loading = $message.loading('正在加载中');
                 request(
-                    `https://cdn.jsdelivr.net/npm/linux-command/command/${command}.md`).then(res => {
+                    `{:npm_cdn()}/linux-command/command/${command}.md`).then(res => {
                     let result = md.render(res.data);
                     Swal.fire({
                         html: `<div class="text-left">${result}</div>`,

@@ -2,8 +2,8 @@
 ﻿
 {block name="title"}{$plugin.title} - {$app.title}{/block}
 {block name="head"}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsoneditor@9.6.0/dist/jsoneditor.min.css">
-<script src="https://cdn.jsdelivr.net/npm/jsoneditor@9.6.0/dist/jsoneditor.min.js"></script>
+<link rel="stylesheet" href="{:npm_cdn()}/jsoneditor@9.6.0/dist/jsoneditor.min.css">
+<script src="{:npm_cdn()}/jsoneditor@9.6.0/dist/jsoneditor.min.js"></script>
 <style>
     .jsoneditor-poweredBy {
         display: none;
@@ -67,7 +67,7 @@
             opts: {
                 mode: 'text',
                 onChangeText(data) {
-                    editor.view.editor.setText(data)
+                    editor.view.editor.setText(JSON.stringify(JSON.parse(data), null, 2))
                 }
             }
         },
