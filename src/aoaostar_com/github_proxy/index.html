@@ -81,6 +81,12 @@
                 'ghproxy.com': (github) => {
                     return 'https://ghproxy.com/' + github.url.toString()
                 },
+                'github.do[CN]': (github) => {
+                    return 'https://github.do/' + github.url.toString()
+                },
+                'monika.love[HK]': (github) => {
+                    return `https://hk1.monika.love/${github.owner}/${github.repo}/${github.version}/${github.file}`
+                },
                 'ghproxy.fsou.cc': (github) => {
                     return 'https://ghproxy.fsou.cc/' + github.url.toString()
                 },
