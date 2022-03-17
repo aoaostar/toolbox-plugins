@@ -1,0 +1,85 @@
+{extend name="layout/plugin_layout" /}
+﻿
+{block name="title"}{$plugin.title} - {$app.title}{/block}
+{block name="main"}
+<div class="container mx-auto" id="app">
+    <div class="card lg:card-side bordered shadow-lg">
+        <div class="card-body">
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text">域名</span>
+                </label>
+                <input type="text" placeholder="请输入需要查询的域名" v-model="set.input"
+                       class="input input-bordered input-primary" @keyup.enter="query">
+            </div>
+
+            <div class="card-actions mt-4">
+                <button class="btn btn-primary flex-1" @click="query">
+                    查询
+                </button>
+            </div>
+            <div v-show="set.output.domain" class="mt-4 overflow-x-auto">
+                <table class="table w-full  table-zebra">
+                    <tbody>
+                    <tr>
+                        <th>ICP备案/许可证号</th>
+                        <td>{{set.output.main_licence}}</td>
+                        <th>审核通过日期</th>
+                        <td>{{set.output.update_record_time}}</td>
+                    </tr>
+                    <tr>
+                        <th>主办单位名称</th>
+                        <td>{{set.output.unit_name}}</td>
+                        <th>主办单位性质</th>
+                        <td>{{set.output.nature_name}}</td>
+                    </tr>
+                    <tr>
+                        <th>网站名称</th>
+                        <td>{{set.output.site_name}}</td>
+                        <th>网站备案/许可证号</th>
+                        <td>{{set.output.service_licence}}</td>
+                    </tr>
+                    <tr>
+                        <th>网站首页网址</th>
+                        <td>{{set.output.main_page}}</td>
+                        <th>网站域名</th>
+                        <td>{{set.output.domain}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            set: {
+                input: '',
+                output: {},
+            }
+        },
+        created() {
+        },
+        methods: {
+            query() {
+                let loading = $message.loading('正在查询中');
+                return httpPost('/api/{$plugin.alias}/query', {
+                        domain: this.set.input
+                    }
+                ).then(res => {
+                    if (res.status === 'ok') {
+                        if (res.data.domain === '--') {
+                            $message.success('未找到该域名的备案信息')
+                        }
+                        this.set.output = res.data
+                    }
+                }).finally(() => loading.close())
+            }
+        },
+    })
+</script>
+
+{/block}

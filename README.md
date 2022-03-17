@@ -18,6 +18,7 @@
         ├─ascii_art
         ├─bandwidth_waste
         ├─base64
+        ├─boce
         ├─bullshit_generator
         ├─byte_calc
         ├─code_css
@@ -29,6 +30,7 @@
         ├─file_hash
         ├─github_proxy
         ├─hash
+        ├─icp
         ├─image2base64
         ├─image_editor
         ├─image_url
@@ -43,12 +45,14 @@
         ├─markdown
         ├─mime_type
         ├─piano
+        ├─ping
         ├─ps
         ├─qrcode
         ├─random_anime_images
         ├─random_beauty_images
         ├─rand_password
         ├─roll_call
+        ├─seo
         ├─short_url
         │  └─api
         ├─special_symbols

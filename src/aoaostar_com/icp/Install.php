@@ -1,22 +1,22 @@
 <?php
 
-namespace plugin\aoaostar_com\alipay_arrival;
+namespace plugin\aoaostar_com\icp;
 
 
 use app\model\Plugin;
 
 class Install implements \plugin\Install
 {
-
+    # 安装时运行方法
     public function Install(Plugin $model)
     {
-        $model->title = '支付宝到账语音';
+        $model->title = "ICP备案查询";
         $model->class = plugin_current_class_get(__NAMESPACE__);
         $model->alias = base_space_name(__NAMESPACE__);
-        $model->desc = '在线生成支付宝到账音效，输入金额，即刻到账！';
-        $model->version = 'v1.1';
+        $model->desc = '通过域名可查询该域名是否有备案及相关的ICP备案许可信息。';
+        $model->version = 'v1.0';
     }
-
+    # 卸载时运行方法
     public function UnInstall(Plugin $model)
     {
 
