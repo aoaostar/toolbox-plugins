@@ -10,7 +10,7 @@
         <div class="card-body overflow-auto">
             <div class="main">
                 <div class="text-center py-12 bg-base-200 hover:bg-base-300 mb-4 rounded relative shadow-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24"
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto mb-3" fill="none" viewBox="0 0 24 24"
                          stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
@@ -77,6 +77,14 @@
         data: {
             nodes: [
                 {
+                    title: 'aichat',
+                    key: 'aichat',
+                },
+                {
+                    title: 'telegraph',
+                    key: 'telegraph',
+                },
+                {
                     title: '百度',
                     key: 'baidu',
                 },
@@ -85,16 +93,12 @@
                     key: 'bkimg',
                 },
                 {
-                    title: 'telegraph',
-                    key: 'telegraph',
-                },
-                {
                     title: 'QQ',
                     key: 'qq',
                 },
             ],
             set: {
-                node: 'baidu',
+                node: localStorage.getItem('image_url_set_node') || 'aichat',
                 outputTypes: {
                     current: 'URL',
                     items: [
@@ -149,6 +153,9 @@
             },
             'urls'(newVal) {
                 this.result = this.urls[this.set.outputTypes.current].join('\n')
+            },
+            'set.node'(newVal) {
+                localStorage.setItem('image_url_set_node', newVal)
             },
             'set.outputTypes.current'(newVal) {
                 this.result = this.urls[this.set.outputTypes.current].join('\n')
