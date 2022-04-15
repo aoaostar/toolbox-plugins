@@ -1,9 +1,7 @@
 {extend name="layout/plugin_layout" /}
 ﻿
 {block name="title"}{$plugin.title} - {$app.title}{/block}
-{block name="head"}
-<script src="{:cdnjs_cdn()}/crypto-js/4.1.1/crypto-js.min.js"></script>
-{/block}
+{block name="head"}{/block}
 {block name="main"}
 <div class="container mx-auto" id="app">
     <div class="card lg:card-side bordered shadow-lg">
@@ -25,7 +23,7 @@
                     </div>
                 </div>
                 <div class="card-actions mt-4">
-                    <button class="btn btn-primary flex-1" @click="copy(set.url.pc)">
+                    <button class="btn btn-primary flex-1" @click="copy(url.pc)">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                              stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -33,7 +31,7 @@
                         </svg>
                         复制电脑端地址
                     </button>
-                    <button class="btn btn-primary flex-1" @click="copy(set.url.mobile)">
+                    <button class="btn btn-primary flex-1" @click="copy(url.mobile)">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                              stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -59,32 +57,31 @@
     new Vue({
         el: '#app',
         data: {
+            set: {
+                pc: 'https://i.v8cdn.cc/s/beauty.jpg',
+                mobile: 'https://i.v8cdn.cc/s/beauty_m.jpg',
+            },
             url: {
                 pc: 'https://i.v8cdn.cc/i/551f1674c001291.jpg',
                 mobile: 'https://i.v8cdn.cc/i/551f1674c001291.jpg',
             },
-            set: {
-                url: {
-                    loading: 'https://i.v8cdn.cc/i/551f1674c001291.jpg',
-                    pc: 'https://i.v8cdn.cc/s/beauty.jpg',
-                    mobile: 'https://i.v8cdn.cc/s/beauty_m.jpg',
-                },
-            },
         },
         created() {
             this.load()
-
         },
         methods: {
             copy(text) {
                 copy(text)
                 $message.success('复制成功')
             },
-            loadImage(url) {
-                return new Promise((resolve => {
-                    let image = new Image();
+            async loadImage(url) {
+                if (url.includes('/s/')) {
+                    const {data: imageUrl} = await request(url + '?type=text')
+                    return this.loadImage(imageUrl)
+                }
+                return await new Promise((resolve => {
+                    const image = new Image();
                     image.src = url
-                    let that = this;
                     image.onload = function () {
                         resolve(image.src)
                     }
@@ -92,24 +89,22 @@
             },
             load() {
                 let task = [
-                    this.loadImage(this.set.url.pc + '?t=' + new Date().getTime()).then(res => {
+                    this.loadImage(this.set.pc).then(res => {
                         this.url.pc = res
                     }),
-                    this.loadImage(this.set.url.mobile + '?t=' + new Date().getTime()).then(res => {
+                    this.loadImage(this.set.mobile).then(res => {
                         this.url.mobile = res
                     })]
                 return Promise.all(task)
+                    .catch(e => {
+                        console.log(e)
+                        $message.error(e)
+                    })
 
             },
             refresh() {
                 const loading = $message.loading('正在加载中');
-                this.load()
-                    .catch(e=>{
-                        $message.error(e)
-                    })
-                    .finally(() => {
-                        loading.close()
-                    })
+                this.load().finally(() => loading.close())
             },
         },
     })
