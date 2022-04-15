@@ -31,9 +31,8 @@
                         </label>
                     </div>
                 </div>
-
-                <div class="flex  my-4">
-                    <div class="form-control" v-for="(item,index) in nodes" :key="index">
+                <div class="flex flex-wrap my-4">
+                    <div class="form-control mr-4" v-for="(item,index) in nodes" :key="index">
                         <label class="cursor-pointer label">
                             <input type="radio" name="set.node" class="radio" v-model="set.node" :value="item.key">
                             <span class="label-text ml-4">{{item.title}}</span>
@@ -87,10 +86,6 @@
                 {
                     title: '百度',
                     key: 'baidu',
-                },
-                {
-                    title: '百度[bkimg]',
-                    key: 'bkimg',
                 },
                 {
                     title: 'QQ',

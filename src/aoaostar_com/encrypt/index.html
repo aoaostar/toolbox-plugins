@@ -1,0 +1,118 @@
+{extend name="layout/plugin_layout" /}
+﻿
+{block name="title"}{$plugin.title} - {$app.title}{/block}
+{block name="head"}
+<script src="{:cdnjs_cdn()}/crypto-js/4.1.1/crypto-js.min.js"></script>
+{/block}
+{block name="main"}
+<div class="container mx-auto" id="app">
+    <div class="card lg:card-side bordered shadow-lg">
+        <div class="card-body overflow-auto">
+            <div class="main">
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">字符串</span>
+                    </label>
+                    <textarea v-model="set.input" class="textarea textarea-bordered h-64"
+                              placeholder="需要加密/解密的字符"></textarea>
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">加密方式</span>
+                    </label>
+                    <div class="flex flex-row flex-wrap">
+                        <label class="flex items-center cursor-pointer" v-for="v in encrypt_types">
+                            <input type="radio" name="encrypt_type" class="radio"
+                                   :value="v"
+                                   v-model="encrypt_type">
+                            <span class="label-text mx-4 my-2">{{v}}</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">密钥</span>
+                    </label>
+                    <input v-model="set.passphrase" type="text" placeholder="秘钥是对称加密、解密的核心，请妥善保存"
+                           class="input input-bordered">
+                </div>
+                <div class="card-actions mt-4">
+                    <button class="btn btn-primary flex-1" @click="encrypt">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M17 13l-5 5m0 0l-5-5m5 5V6"/>
+                        </svg>
+                        加密
+                    </button>
+                    <button class="btn btn-primary flex-1" @click="decrypt">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M7 11l5-5m0 0l5 5m-5-5v12"/>
+                        </svg>
+                        解密
+                    </button>
+                    <button class="btn btn-primary flex-1" @click="reset">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                  d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                                  clip-rule="evenodd"/>
+                        </svg>
+                        清空
+                    </button>
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">结果</span>
+                    </label>
+                    <textarea v-model="set.output" class="textarea textarea-bordered  h-64"
+                              placeholder="加密/解密的结果"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            encrypt_type: 'AES',
+            encrypt_types: ['AES', 'DES', 'RC4', 'Rabbit', 'TripleDES', 'RC4Drop', 'RabbitLegacy'],
+            set: {
+                input: '',
+                output: '',
+                passphrase: '',
+            },
+        },
+        created() {
+        },
+        methods: {
+            encrypt() {
+                try {
+                    this.set.output = CryptoJS[`${this.encrypt_type}`].encrypt(this.set.input, this.set.passphrase).toString();
+                } catch (e) {
+                    $message.error(e.message)
+                }
+            },
+            decrypt() {
+                try {
+                    console.log(this.set.output, this.set.passphrase)
+                    this.set.input = CryptoJS[`${this.encrypt_type}`].decrypt(this.set.output, this.set.passphrase).toString(CryptoJS.enc.Utf8);
+                } catch (e) {
+                    $message.error(e.message)
+                }
+
+            },
+            reset() {
+                this.set.input = ''
+                this.set.output = ''
+                this.set.passphrase = ''
+            },
+        },
+    })
+
+</script>
+
+{/block}

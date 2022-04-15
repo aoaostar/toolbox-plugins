@@ -1,0 +1,368 @@
+{extend name="layout/plugin_layout" /}
+﻿
+{block name="title"}{$plugin.title} - {$app.title}{/block}
+{block name="head"}
+<script src="{:cdnjs_cdn()}/jsrsasign/10.5.16/jsrsasign-all-min.min.js"></script>
+{/block}
+{block name="main"}
+<div class="container mx-auto" id="app">
+    <div class="card lg:card-side bordered shadow-lg">
+        <div class="card-body">
+            <div class="tabs tabs-boxed ">
+                <a class="tab" @click="show=0" :class="{'tab-active':show===0}">RSA公私钥生成</a>
+                <a class="tab" @click="show=1" :class="{'tab-active':show===1}">RSA加密解密</a>
+                <a class="tab" @click="show=2" :class="{'tab-active':show===2}">RSA签名验签</a>
+                <a class="tab" @click="show=3" :class="{'tab-active':show===3}">RSA公私钥对验证</a>
+                <a class="tab" @click="show=4" :class="{'tab-active':show===4}">RSA公钥导出</a>
+            </div>
+            <div class="tab-content" v-show="show===0">
+                <div class="form-control ">
+                    <label class="label">
+                        <span class="label-text">密钥长度</span>
+                    </label>
+                    <select class="select select-bordered w-full "
+                            v-model="generate_from.private_key_bits">
+                        <option v-for="v in [512,1024,2048,4096]" :value="v">{{v}} bit</option>
+                    </select>
+                </div>
+                <div class="form-control ">
+                    <label class="label">
+                        <span class="label-text">私钥密码</span>
+                    </label>
+                    <input type="text" placeholder="Type here" class="input input-bordered w-full "
+                           v-model="mutipart_from.pass_phrase">
+                </div>
+                <div class="flex my-4">
+                    <button class="btn btn-primary flex-1" @click="generate">生成</button>
+                </div>
+                <div class="flex flex-col lg:flex-row">
+                    <div class="form-control flex-1 lg:mr-4">
+                        <label class="label">
+                            <span class="label-text">RSA加密公钥</span>
+                        </label>
+                        <textarea class="textarea textarea-bordered h-64" v-model="mutipart_from.public_key"></textarea>
+                    </div>
+                    <div class="form-control flex-1">
+                        <label class="label">
+                            <span class="label-text">RSA加密私钥</span>
+                        </label>
+                        <textarea class="textarea textarea-bordered h-64"
+                                  v-model="mutipart_from.private_key"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-content" v-show="show===1">
+                <div class="form-control ">
+                    <label class="label">
+                        <span class="label-text">填充标志</span>
+                    </label>
+                    <select class="select select-bordered w-full "
+                            v-model="crypto_from.openssl_padding">
+                        <option v-for="v,index in openssl_padding" :value="index+1">{{v}}</option>
+                    </select>
+                </div>
+                <div class="form-control ">
+                    <label class="label">
+                        <span class="label-text">加密/解密方式</span>
+                    </label>
+                    <select class="select select-bordered w-full "
+                            v-model="crypto_from.type">
+                        <option :value="0">使用公钥加密，使用私钥解密</option>
+                        <option :value="1">使用私钥加密，使用公钥解密</option>
+                    </select>
+                </div>
+                <div class="form-control ">
+                    <label class="label">
+                        <span class="label-text">私钥密码</span>
+                    </label>
+                    <input type="text" placeholder="Type here" class="input input-bordered w-full "
+                           v-model="mutipart_from.pass_phrase">
+                </div>
+                <div class="flex my-4">
+                    <button class="btn btn-primary flex-1 mr-4" @click="encrypt">加密</button>
+                    <button class="btn btn-primary flex-1" @click="decrypt">解密</button>
+                </div>
+                <div class="flex flex-col lg:flex-row">
+                    <div class="form-control flex-1 lg:mr-4">
+                        <label class="label">
+                            <span class="label-text">RSA加密公钥</span>
+                        </label>
+                        <textarea class="textarea textarea-bordered h-64" v-model="mutipart_from.public_key"></textarea>
+                    </div>
+                    <div class="form-control flex-1">
+                        <label class="label">
+                            <span class="label-text">RSA加密私钥</span>
+                        </label>
+                        <textarea class="textarea textarea-bordered h-64"
+                                  v-model="mutipart_from.private_key"></textarea>
+                    </div>
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">原文，未加密的内容</span>
+                    </label>
+                    <textarea class="textarea textarea-bordered h-64" v-model="crypto_from.origin"></textarea>
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">密文，加密后的内容</span>
+                    </label>
+                    <textarea class="textarea textarea-bordered h-64" v-model="crypto_from.coded"></textarea>
+                </div>
+            </div>
+            <div class="tab-content" v-show="show===2">
+                <div class="form-control ">
+                    <label class="label">
+                        <span class="label-text">签名算法</span>
+                    </label>
+                    <select class="select select-bordered w-full "
+                            v-model="sign_form.openssl_algo">
+                        <option v-for="v,index in openssl_algo" :value="index+1">{{v}}</option>
+                    </select>
+                </div>
+                <div class="form-control ">
+                    <label class="label">
+                        <span class="label-text">私钥密码</span>
+                    </label>
+                    <input type="text" placeholder="Type here" class="input input-bordered w-full "
+                           v-model="mutipart_from.pass_phrase">
+                </div>
+                <div class="flex my-4">
+                    <button class="btn btn-primary flex-1 mr-4" @click="sign">签名</button>
+                    <button class="btn btn-primary flex-1" @click="verify">验签</button>
+                </div>
+                <div class="flex flex-col lg:flex-row">
+                    <div class="form-control flex-1 lg:mr-4">
+                        <label class="label">
+                            <span class="label-text">RSA加密公钥</span>
+                        </label>
+                        <textarea class="textarea textarea-bordered h-64" v-model="mutipart_from.public_key"></textarea>
+                    </div>
+                    <div class="form-control flex-1">
+                        <label class="label">
+                            <span class="label-text">RSA加密私钥</span>
+                        </label>
+                        <textarea class="textarea textarea-bordered h-64"
+                                  v-model="mutipart_from.private_key"></textarea>
+                    </div>
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">待签名，验签原始内容</span>
+                    </label>
+                    <textarea class="textarea textarea-bordered h-64" v-model="sign_form.data"></textarea>
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">签名，已签名内容</span>
+                    </label>
+                    <textarea class="textarea textarea-bordered h-64" v-model="sign_form.sign"></textarea>
+                </div>
+            </div>
+            <div class="tab-content" v-show="show===3">
+                <div class="form-control ">
+                    <label class="label">
+                        <span class="label-text">私钥密码</span>
+                    </label>
+                    <input type="text" placeholder="Type here" class="input input-bordered w-full "
+                           v-model="mutipart_from.pass_phrase">
+                </div>
+                <div class="flex my-4">
+                    <button class="btn btn-primary flex-1" @click="check">验证</button>
+                </div>
+                <div class="flex flex-col lg:flex-row">
+                    <div class="form-control flex-1 lg:mr-4">
+                        <label class="label">
+                            <span class="label-text">RSA加密公钥</span>
+                        </label>
+                        <textarea class="textarea textarea-bordered h-64" v-model="mutipart_from.public_key"></textarea>
+                    </div>
+                    <div class="form-control flex-1">
+                        <label class="label">
+                            <span class="label-text">RSA加密私钥</span>
+                        </label>
+                        <textarea class="textarea textarea-bordered h-64"
+                                  v-model="mutipart_from.private_key"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-content" v-show="show===4">
+                <div class="form-control ">
+                    <label class="label">
+                        <span class="label-text">私钥密码</span>
+                    </label>
+                    <input type="text" placeholder="Type here" class="input input-bordered w-full "
+                           v-model="mutipart_from.pass_phrase">
+                </div>
+                <div class="flex my-4">
+                    <button class="btn btn-primary flex-1" @click="output">导出</button>
+                </div>
+                <div class="flex flex-col lg:flex-row">
+                    <div class="form-control flex-1 lg:mr-4">
+                        <label class="label">
+                            <span class="label-text">RSA加密公钥</span>
+                        </label>
+                        <textarea class="textarea textarea-bordered h-64" v-model="mutipart_from.public_key"></textarea>
+                    </div>
+                    <div class="form-control flex-1">
+                        <label class="label">
+                            <span class="label-text">RSA加密私钥</span>
+                        </label>
+                        <textarea class="textarea textarea-bordered h-64"
+                                  v-model="mutipart_from.private_key"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            show: parseInt(localStorage.getItem('{$plugin.alias}_show') || 0),
+            openssl_padding: [
+                'OPENSSL_PKCS1_PADDING',
+                'OPENSSL_SSLV23_PADDING',
+                'OPENSSL_NO_PADDING',
+                'OPENSSL_PKCS1_OAEP_PADDING',
+            ],
+            openssl_algo: [
+                'OPENSSL_ALGO_SHA1',
+                'OPENSSL_ALGO_MD5',
+                'OPENSSL_ALGO_MD4',
+                'OPENSSL_ALGO_MD2',
+                'OPENSSL_ALGO_DSS1',
+                'OPENSSL_ALGO_SHA224',
+                'OPENSSL_ALGO_SHA256',
+                'OPENSSL_ALGO_SHA384',
+                'OPENSSL_ALGO_SHA512',
+                'OPENSSL_ALGO_RMD160',
+            ],
+            mutipart_from: JSON.parse(localStorage.getItem('{$plugin.alias}_mutipart_from') || JSON.stringify({
+                public_key: '',
+                private_key: '',
+                pass_phrase: '',
+            })),
+            generate_from: {
+                private_key_bits: 512,
+            },
+            crypto_from: {
+                openssl_padding: 1,
+                type: 0,
+                origin: '',
+                coded: ''
+            },
+            sign_form: {
+                openssl_algo: 1,
+                data: "",
+                sign: "",
+            },
+        },
+        watch: {
+            show(newVal) {
+                localStorage.setItem('{$plugin.alias}_show', newVal)
+            },
+            mutipart_from: {
+                handler: (newVal) => {
+                    localStorage.setItem('{$plugin.alias}_mutipart_from', JSON.stringify(newVal))
+                },
+                deep: true,
+            }
+        },
+        methods: {
+            generate() {
+                const loading = $message.loading("正在生成中")
+                return httpPost('/api/{$plugin.alias}/generate', {
+                    ...this.generate_from,
+                    pass_phrase: this.mutipart_from.pass_phrase
+                }).then(res => {
+                    this.mutipart_from.public_key = res.data.public_key
+                    this.mutipart_from.private_key = res.data.private_key
+                }).finally(() => loading.close())
+            },
+            encrypt() {
+                if (this.crypto_from.origin === "") {
+                    $message.error("原文不得为空")
+                    return
+                }
+                let api = '/api/{$plugin.alias}/private_encrypt'
+                if (this.crypto_from.type === 0) {
+                    api = '/api/{$plugin.alias}/public_encrypt'
+                }
+                const loading = $message.loading("正在加密中")
+                return httpPost(api, {
+                    ...this.crypto_from,
+                    ...this.mutipart_from
+                }).then(res => {
+                    this.crypto_from.coded = res.data
+                }).finally(() => loading.close())
+            },
+            decrypt() {
+                if (this.crypto_from.coded === "") {
+                    $message.error("密文不得为空")
+                    return
+                }
+                let api = '/api/{$plugin.alias}/private_decrypt'
+                if (this.crypto_from.type !== 0) {
+                    api = '/api/{$plugin.alias}/public_decrypt'
+                }
+                const loading = $message.loading("正在解密中")
+                return httpPost(api, {
+                    ...this.crypto_from,
+                    ...this.mutipart_from
+                }).then(res => {
+                    this.crypto_from.origin = res.data
+                }).finally(() => loading.close())
+            },
+            verify() {
+                if (this.sign_form.sign === "") {
+                    $message.error("签名不得为空")
+                    return
+                }
+                const loading = $message.loading('正在验签中')
+                return httpPost('/api/{$plugin.alias}/verify', {
+                    ...this.sign_form,
+                    ...this.mutipart_from
+                }).then(res => {
+                    if (res.status === "ok") {
+                        $message.success(res.message)
+                    }
+                }).finally(() => loading.close())
+            },
+            sign() {
+                const loading = $message.loading('正在签名中')
+                return httpPost('/api/{$plugin.alias}/sign', {
+                    ...this.sign_form,
+                    ...this.mutipart_from
+                }).then(res => {
+                    this.sign_form.sign = res.data
+                }).finally(() => loading.close())
+            },
+            check() {
+                const loading = $message.loading('正在验证中')
+                return httpPost('/api/{$plugin.alias}/check', {
+                    ...this.mutipart_from
+                }).then(res => {
+                    if (res.status === "ok") {
+                        $message.success(res.message)
+                    }
+                }).finally(() => loading.close())
+            },
+            output() {
+                const loading = $message.loading('正在导出中')
+                return httpPost('/api/{$plugin.alias}/output', {
+                    ...this.mutipart_from
+                }).then(res => {
+                    if (res.status === "ok") {
+                        $message.success(res.message)
+                        this.mutipart_from.public_key = res.data
+                    }
+                }).finally(() => loading.close())
+            },
+        },
+    })
+</script>
+
+{/block}

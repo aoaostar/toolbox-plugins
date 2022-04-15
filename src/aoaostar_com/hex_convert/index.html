@@ -1,0 +1,104 @@
+{extend name="layout/plugin_layout" /}
+﻿
+{block name="title"}{$plugin.title} - {$app.title}{/block}
+{block name="head"}{/block}
+{block name="main"}
+<div class="container mx-auto" id="app">
+    <div class="card lg:card-side bordered shadow-lg">
+        <div class="card-body overflow-auto">
+            <div class="main">
+                <div class="flex flex-col md:flex-row">
+                    <div class="form-control md:w-80 md:mr-3">
+                        <label class="label">
+                            <span class="label-text">进制</span>
+                        </label>
+                        <select class="select select-bordered w-full" v-model="hex_type">
+                            <option :value="v" v-for="v in hex_types">{{v}}进制</option>
+                        </select>
+                    </div>
+                    <div class="form-control md:w-80">
+                        <label class="label">
+                            <span class="label-text">结果进制</span>
+                        </label>
+                        <select class="select select-bordered w-full" v-model="to_hex_type">
+                            <option :value="v" v-for="v in hex_types">{{v}}进制</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">转换数字</span>
+                    </label>
+                    <input v-model="input" type="text" placeholder="请在此输入转化数字"
+                           class="input input-bordered">
+                </div>
+                <div class="card-actions mt-4">
+                    <button class="btn btn-primary flex-1" @click="transform">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M17 13l-5 5m0 0l-5-5m5 5V6"/>
+                        </svg>
+                        转化
+                    </button>
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">转换结果</span>
+                    </label>
+                    <input v-model="output" type="text" class="input input-bordered">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            hex_types: (() => {
+                let arr = []
+                for (let i = 1; i < 19; i++) {
+                    arr.push(2 * i)
+                }
+                return arr
+            })(),
+            hex_type: 10,
+            to_hex_type: 2,
+            input: '',
+            output: '',
+        },
+        watch: {
+            input(newVal, oldVal) {
+                if (this.hex_type < 10) {
+                    for (const v of newVal) {
+                        if (v >= this.hex_type) {
+                            this.input = oldVal
+                            return
+                        }
+                    }
+                }
+                this.transform()
+            },
+            hex_type() {
+                this.input = ''
+            },
+            to_hex_type() {
+                this.transform()
+            }
+        },
+        methods: {
+            transform() {
+                try {
+                    this.output = parseInt(this.input, this.hex_type).toString(this.to_hex_type);
+                } catch (e) {
+                    $message.error(e.message)
+                }
+            },
+        },
+    })
+
+</script>
+
+{/block}
