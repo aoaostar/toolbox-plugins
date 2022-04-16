@@ -1,0 +1,475 @@
+{extend name="layout/plugin_layout" /}
+{block name="title"}{$plugin.title} - {$app.title}{/block}
+{block name="head"}
+<script src="{:npm_cdn()}/uuid@latest/dist/umd/uuidv4.min.js"></script>
+<script src="{:cdnjs_cdn()}/crypto-js/4.1.1/crypto-js.min.js"></script>
+<style>
+    .textarea {
+        word-break: break-all;
+    }
+
+    .setting {
+        position: fixed;
+        top: 50%;
+        left: 0;
+    }
+
+    .setting .sidebar-item {
+        border-radius: 0 var(--rounded-btn, .5rem) var(--rounded-btn, .5rem) 0;
+    }
+</style>
+{/block}
+{block name="main"}
+<div class="container mx-auto" id="app" @paste="onPaste">
+    <div class="card lg:card-side bordered shadow-lg">
+        <div class="card-body overflow-auto">
+            <div class="main">
+                <div class="text-center py-12 bg-base-200 hover:bg-base-300 mb-4 rounded relative shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto mb-3" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                    </svg>
+                    <span>拖拽文件到这里或者点击选择文件</span>
+                    <input @change="selectFile" class="opacity-0 absolute top-0 left-0 h-full w-full cursor-pointer"
+                           type="file" id="file" multiple>
+                </div>
+                <div class="alert shadow-lg">
+                    <div class="flex-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#2196f3"
+                             class="w-6 h-6 mx-2">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <label>可同时选择多个文件上传<br>
+                            上传至你自己的github仓库中，本站不会中转也不会保存
+                            <a class="link ml-3" target="_blank" href="https://blog.aoaostar.com/post/77d8b47f/">不懂怎么用？</a>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-control my-4">
+                    <label class="label">
+                        <span class="label-text">节点</span>
+                    </label>
+                    <div class="flex flex-wrap ">
+                        <div class="mr-4" v-for="(item,index) in nodes" :key="index">
+                            <label class="cursor-pointer label">
+                                <input type="radio" name="set.node" class="radio" v-model="set.node" :value="item.key">
+                                <span class="label-text ml-4">{{item.title}}</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button v-for="v in set.output_types.items" class="btn btn-outline btn-sm"
+                        :class="{'btn-active':set.output_types.current===v.key}"
+                        @click="set.output_types.current=v.key"
+                >
+                    {{v.title}}
+                </button>
+            </div>
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text">URL</span>
+                </label>
+                <textarea v-model="result" class="textarea textarea-bordered h-64"></textarea>
+            </div>
+
+        </div>
+    </div>
+    <div @paste.stop="" class="setting">
+        <label for="setting" class="btn sidebar-item modal-button">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                 stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+        </label>
+        <input type="checkbox" id="setting" class="modal-toggle">
+        <div class="modal">
+            <div class="modal-box relative">
+                <label for="setting" class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+                <div class="form-control w-full ">
+                    <label class="label">
+                        <span class="label-text">Github Token</span>
+                    </label>
+                    <input type="text" placeholder="ghp_xxxxxxxx" class="input input-bordered w-full"
+                           v-model="set.github.token">
+                </div>
+                <div class="form-control w-full ">
+                    <label class="label">
+                        <span class="label-text">用户名</span>
+                    </label>
+                    <input type="text" placeholder="aoaostar" class="input input-bordered w-full" disabled
+                           v-model="set.github.user">
+                </div>
+                <div class="form-control w-full ">
+                    <label class="label">
+                        <span class="label-text">选择仓库</span>
+                    </label>
+                    <select class="select select-bordered w-full" v-model="set.github.repo">
+                        <option :value="v.name" v-for="v in set.github.repos">{{v.name}}</option>
+                    </select>
+                </div>
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text">分支</span>
+                    </label>
+                    <input type="text" placeholder="master" class="input input-bordered w-full"
+                           v-model="set.github.branch">
+                </div>
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text">文件命名风格</span>
+                    </label>
+                    <input type="text" placeholder="{YYYY}/{mm}/{dd}/{sha1}{extension}"
+                           class="input input-bordered w-full"
+                           v-model="set.github.style">
+                </div>
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text">接口地址</span>
+                    </label>
+                    <input type="text" placeholder="https://api.github.com" class="input input-bordered w-full"
+                           v-model="set.github.api">
+                    <label class="label">
+                        <span class="label-text-alt">可配合代理使用</span>
+                    </label>
+                </div>
+                <div class="btn-group my-3">
+                    <button class="btn flex-1" @click="get_repo">获取仓库信息</button>
+                    <button class="btn flex-1" @click="save_config">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    const file_info = async (file) => {
+        return await new Promise((resolve) => {
+            let reader = new FileReader();
+            reader.onload = (e) => {
+                const wordArray = CryptoJS.lib.WordArray.create(reader.result);
+                resolve({
+                    sha1: CryptoJS.SHA1(wordArray).toString(),
+                    md5: CryptoJS.MD5(wordArray).toString(),
+                    base64: CryptoJS.enc.Base64.stringify(wordArray),
+                })
+            }
+            reader.readAsArrayBuffer(file)
+        })
+    }
+    const uniqid = function () {
+        return (Date.now().toString(36) + Math.random().toString(36).substr(2, 5))
+    }
+    const get_proxy_url = (url) => {
+        return '//i0.wp.com/' + url.replace(/^http[s]?:\/\//, '', url)
+    }
+    const github_request = (opt, github) => {
+        opt = {
+            method: opt.method,
+            headers: {
+                accept: "application/vnd.github.v3+json",
+                Authorization: "token " + github.token,
+            },
+            ...opt,
+            url: `${github.api || 'https://api.github.com'}/${opt.url.replace(/^[\/\s]+/, '')}`,
+        }
+        return request(opt).then(res => {
+            return res.data
+        })
+    }
+    const render_filename = (filename, fileInfo) => {
+        const date = new Date()
+        const template = {
+            YYYY: date.getFullYear(),
+            mm: date.getMonth() + 1 > 9 ? date.getMonth() + 1 : '0' + (date.getMonth() + 1),
+            dd: date.getDate() > 9 ? date.getDate() : '0' + date.getDate(),
+            uuid: uuidv4(),
+            uniqid: uniqid(),
+            sha1: fileInfo.sha1,
+            md5: fileInfo.md5,
+            extension: fileInfo.extension,
+        }
+        for (const k in template) {
+            filename = filename.replace(`{${k}}`, template[k])
+        }
+        return filename.replace(/^[\/\s]+/, '')
+
+    }
+    const sendRequest = async (file, github) => {
+        const fileInfo = await file_info(file);
+        fileInfo.extension = file.name.slice(file.name.lastIndexOf('.'))
+        const filename = render_filename(github.style, fileInfo)
+        let opt = {
+            url: `/repos/${github.user}/${github.repo}/contents/${filename}`,
+            method: "put",
+            data: {
+                "message": `update ${new Date().toLocaleString()}`,
+                "branch": github.branch,
+                "sha": fileInfo.sha1,
+                "content": fileInfo.base64,
+            }
+        }
+        return new Promise((resolve, reject) => {
+            github_request(opt, github).then(res => {
+                resolve(res)
+            }).catch(e => {
+                console.log(e.response)
+                if (e.response.status === 409) {
+                    resolve({
+                        content: {
+                            download_url: `https://raw.githubusercontent.com/${github.user}/${github.repo}/${github.branch}/${filename}`
+                        }
+                    })
+                } else {
+                    reject(e)
+                }
+            })
+        })
+    }
+    new Vue({
+        el: '#app',
+        data: {
+            nodes: [
+                {
+                    title: 'raw.githubusercontent.com',
+                    key: 'raw.githubusercontent.com',
+                    parse: (github) => {
+                        return `https://raw.githubusercontent.com/${github.owner}/${github.repo}/${github.branch}/${github.file}`
+                    },
+                },
+                {
+                    title: 'cdn.jsdelivr.net',
+                    key: 'cdn.jsdelivr.net',
+                    parse: (github) => {
+                        return `https://cdn.jsdelivr.net/gh/${github.owner}/${github.repo}@${github.branch}/${github.file}`
+                    },
+                },
+                {
+                    title: 'i0.wp.com',
+                    key: 'i0.wp.com',
+                    parse: (github) => {
+                        return `https://i0.wp.com/raw.githubusercontent.com/${github.owner}/${github.repo}/${github.branch}/${github.file}`
+                    },
+                },
+                {
+                    title: 'cdn.staticaly.com',
+                    key: 'cdn.staticaly.com',
+                    parse: (github) => {
+                        return `https://cdn.staticaly.com/gh/${github.owner}/${github.repo}/${github.branch}/${github.file}`
+                    },
+                },
+                {
+                    title: 'github.do',
+                    key: 'github.do',
+                    parse: (github) => {
+                        return `https://github.do/https://raw.githubusercontent.com/${github.owner}/${github.repo}/${github.branch}/${github.file}`
+                    },
+                },
+            ],
+            set: {
+                node: localStorage.getItem('{$plugin.alias}_set_node') || 'raw.githubusercontent.com',
+                output_types: {
+                    current: 'URL',
+                    items: [
+                        {
+                            title: 'URL',
+                            key: 'URL',
+                            template: '#url#',
+                        },
+                        {
+                            title: 'HTML',
+                            key: 'HTML',
+                            template: '<img src="#url#"/>',
+                        },
+                        {
+                            title: 'BBCode',
+                            key: 'BBCode',
+                            template: '[img]#url#[/img]',
+                        },
+                        {
+                            title: 'Markdown',
+                            key: 'Markdown',
+                            template: '![](#url#)',
+                        },
+                        {
+                            title: 'Markdown With Link',
+                            key: 'MarkdownWithLink',
+                            template: '[![](#url#)](#url#)',
+                        },
+                    ]
+                },
+                output: [],
+                github: JSON.parse(localStorage.getItem('{$plugin.alias}_github_setting')) || {
+                    token: '',
+                    user: '',
+                    repo: '',
+                    repos: [],
+                    branch: 'master',
+                    style: '{YYYY}/{mm}/{dd}/{sha1}{extension}',
+                    api: 'https://api.github.com',
+                }
+            },
+            urls: {},
+            result: '',
+        },
+        watch: {
+            'set.output'(newVal) {
+                let list = {}
+                const current_node = this.nodes.find(value => {
+                    return value.key === this.set.node
+                })
+                for (item of this.set.output_types.items) {
+                    let arr = []
+                    for (const v of newVal) {
+                        arr.push(item.template.replaceAll('#url#', current_node.parse(v)))
+                    }
+                    list[item.key] = arr;
+                }
+                this.urls = list
+            },
+            'urls'(newVal) {
+                this.result = newVal[this.set.output_types.current].join('\n')
+            },
+            'set.node'(newVal) {
+                this.set.output = [...this.set.output]
+                localStorage.setItem('{$plugin.alias}_set_node', newVal)
+            },
+            'set.output_types.current'(newVal) {
+                this.result = this.urls[newVal].join('\n')
+            },
+            'set.github.repo'(newVal) {
+                let repo = this.set.github.repos.find(value => value.name === newVal);
+                this.set.github.branch = repo.default_branch
+            }
+        },
+        methods: {
+            async get_repo() {
+                if (this.set.github.token === '') {
+                    $message.error("token不得为空")
+                    return
+                }
+                const loading = $message.loading("正在获取仓库信息");
+                try {
+                    this.set.github.user = await github_request({
+                        url: "/user",
+                    }, this.set.github).then(resp => {
+                        return resp.login
+                    })
+                    github_request({
+                        url: `/users/${this.set.github.user}/repos?type=public&sort=created`,
+                    }, this.set.github).then(resp => {
+                        this.set.github.repos = resp.filter(v => {
+                            return v.fork === false
+                        })
+                    })
+                } catch (e) {
+                    $message.error(e.message)
+                } finally {
+                    loading.close()
+                }
+            },
+            save_config() {
+                localStorage.setItem("{$plugin.alias}_github_setting", JSON.stringify(this.set.github))
+                $message.success("保存成功")
+            },
+            selectFile(e) {
+                this.upload(e.target.files)
+            },
+            addUrl(url) {
+                let obj = new URL(url)
+                let arr = obj.pathname.split('/');
+                const github = {
+                    owner: arr[1],
+                    repo: arr[2],
+                    branch: arr[3],
+                    file: arr.slice(4).join('/'),
+                }
+                this.set.output.push(github)
+            },
+            async upload(files) {
+                if (Object.values(this.set.github).includes('')) {
+                    $message.error("请配置好GitHub信息后再上传")
+                    return
+                }
+                const loading = $message.loading('正在上传图片')
+                let tasks = []
+                for (file of files) {
+                    tasks.push(sendRequest(file, this.set.github).then(res => {
+                        if (res?.content?.download_url) {
+                            this.addUrl(res.content.download_url)
+                        } else if (res?.message) {
+                            throw res;
+                        }
+                    }))
+                }
+
+                Promise.all(tasks).catch(e => {
+                    console.log(e)
+                    $message.error(e.message)
+                }).finally(() => loading.close())
+            },
+            onPaste(event) {
+                // 监听 ctrl+v键盘事件
+                if (event.clipboardData || event.originalEvent) {
+                    let clipboardData =
+                        event.clipboardData || event.originalEvent.clipboardData;
+                    if (clipboardData.items) {
+                        // for chrome
+                        let items = clipboardData.items,
+                            len = items.length,
+                            blob = null;
+                        event.preventDefault();
+                        for (let i = 0; i < len; i++) {
+                            if (items[i].type.indexOf("image") !== -1) {
+                                blob = items[i].getAsFile();
+                                if (blob != null) {
+                                    this.upload([changeBlobFileName(blob)], this.set.node)
+                                }
+                            }
+                            if (items[i].type === "text/plain") {
+
+                                items[i].getAsString((text) => {
+                                    let arr = text.split(/[(\r\n)\r\n]+/); // 以转行符切割文本字符串
+                                    let files = []
+                                    let tasks = []
+                                    for (let k in arr) {
+                                        const item = arr[k].trim();
+                                        if (item) {
+                                            if (!/^(https\:|http\:|)\/\//.test(item)) {
+                                                $message.error(`[${item}]URL异常，请输入正确的URL`)
+                                                return;
+                                            }
+                                            const loading = $message.loading('正在获取远程图片')
+                                            tasks.push(
+                                                fetch(get_proxy_url(item), {
+                                                    mode: "cors",
+                                                }).then(async (res) => {
+                                                    if (res.ok) {
+                                                        return res.blob();
+                                                    }
+                                                    $message.error('图片获取失败')
+                                                }).then(blob => {
+                                                    files.push(changeBlobFileName(blob))
+                                                }).finally(() => loading.close()))
+                                        }
+                                    }
+                                    Promise.all(tasks).then(() => {
+                                        this.upload(files)
+                                    })
+                                })
+                            }
+                        }
+                    }
+                }
+            },
+        },
+    })
+
+</script>
+
+{/block}

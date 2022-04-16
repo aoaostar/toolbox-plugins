@@ -240,11 +240,11 @@
                 'OPENSSL_ALGO_SHA512',
                 'OPENSSL_ALGO_RMD160',
             ],
-            mutipart_from: JSON.parse(localStorage.getItem('{$plugin.alias}_mutipart_from') || JSON.stringify({
+            mutipart_from: JSON.parse(localStorage.getItem('{$plugin.alias}_mutipart_from')) || {
                 public_key: '',
                 private_key: '',
                 pass_phrase: '',
-            })),
+            },
             generate_from: {
                 private_key_bits: 512,
             },

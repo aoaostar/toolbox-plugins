@@ -2,7 +2,11 @@
 ﻿
 {block name="title"}{$plugin.title} - {$app.title}{/block}
 {block name="head"}
-<script src="{:cdnjs_cdn()}/crypto-js/4.1.1/crypto-js.min.js"></script>
+<style>
+    .textarea {
+        word-break: break-all;
+    }
+</style>
 {/block}
 {block name="main"}
 <div class="container mx-auto" id="app">
@@ -41,9 +45,9 @@
                 </div>
             </div>
             <div class="btn-group">
-                <button v-for="v in set.outputTypes.items" class="btn btn-outline btn-sm"
-                        :class="{'btn-active':set.outputTypes.current===v.key}"
-                        @click="set.outputTypes.current=v.key"
+                <button v-for="v in set.output_types.items" class="btn btn-outline btn-sm"
+                        :class="{'btn-active':set.output_types.current===v.key}"
+                        @click="set.output_types.current=v.key"
                 >
                     {{v.title}}
                 </button>
@@ -94,7 +98,7 @@
             ],
             set: {
                 node: localStorage.getItem('image_url_set_node') || 'aichat',
-                outputTypes: {
+                output_types: {
                     current: 'URL',
                     items: [
                         {
@@ -115,7 +119,7 @@
                         {
                             title: 'Markdown',
                             key: 'Markdown',
-                            template: '![group.png](#url#)',
+                            template: '![](#url#)',
                         },
                         {
                             title: 'Markdown With Link',
@@ -137,7 +141,7 @@
         watch: {
             'set.output'(newVal) {
                 let list = []
-                for (item of this.set.outputTypes.items) {
+                for (item of this.set.output_types.items) {
                     let arr = []
                     for (const v of newVal) {
                         arr.push(item.template.replaceAll('#url#', v))
@@ -147,13 +151,13 @@
                 this.urls = list
             },
             'urls'(newVal) {
-                this.result = this.urls[this.set.outputTypes.current].join('\n')
+                this.result = newVal[this.set.output_types.current].join('\n')
             },
             'set.node'(newVal) {
-                localStorage.setItem('image_url_set_node', newVal)
+                localStorage.setItem('{$plugin.alias}_set_node', newVal)
             },
-            'set.outputTypes.current'(newVal) {
-                this.result = this.urls[this.set.outputTypes.current].join('\n')
+            'set.output_types.current'(newVal) {
+                this.result = this.urls[newVal].join('\n')
             }
         },
         methods: {
@@ -165,28 +169,25 @@
             },
             async upload(files, node) {
                 const loading = $message.loading('正在上传图片')
-                try {
-                    let tasks = []
-                    for (file of files) {
-                        tasks.push(sendRequest(file, node).then(res => {
-                            if (res.status === 'ok') {
-                                this.addUrl(res.data.url)
-                            } else if (res.message) {
-                                throw res;
-                            }
-                        }))
-                    }
-                    Promise.all(tasks).finally(() => {
-                        loading.close();
-                    })
-                } catch (e) {
-                    $message.error(e.message)
-                    loading.close();
+                let tasks = []
+                for (file of files) {
+                    tasks.push(sendRequest(file, node).then(res => {
+                        if (res?.status === 'ok') {
+                            this.addUrl(res.data.url)
+                        } else if (res?.message) {
+                            throw res;
+                        }
+                    }))
                 }
+                Promise.all(tasks).catch(e => {
+                    console.log(e)
+                    $message.error(e.message)
+                }).finally(() => {
+                    loading.close();
+                })
             },
             onPaste(event) {
                 // 监听 ctrl+v键盘事件
-                let that = this;
                 if (event.clipboardData || event.originalEvent) {
                     let clipboardData =
                         event.clipboardData || event.originalEvent.clipboardData;
@@ -200,12 +201,12 @@
                             if (items[i].type.indexOf("image") !== -1) {
                                 blob = items[i].getAsFile();
                                 if (blob != null) {
-                                    that.upload([changeBlobFileName(blob)], that.set.node)
+                                    this.upload([changeBlobFileName(blob)], this.set.node)
                                 }
                             }
                             if (items[i].type === "text/plain") {
 
-                                items[i].getAsString(function (text) {
+                                items[i].getAsString((text) => {
                                     let arr = text.split(/[(\r\n)\r\n]+/); // 以转行符切割文本字符串
                                     let files = []
                                     let tasks = []
@@ -231,7 +232,7 @@
                                         }
                                     }
                                     Promise.all(tasks).then(() => {
-                                        that.upload(files, that.set.node)
+                                        this.upload(files, this.set.node)
                                     })
                                 })
                             }
