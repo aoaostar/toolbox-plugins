@@ -119,15 +119,18 @@
                         }, 0));
                         this.spend++
                     }, 1000)
-                    do {
-                        await new Promise(resolve => {
-                            let task = []
-                            for (let i = 0; i < this.set.thread; i++) {
-                                task.push(this.download(Math.random().toString(36).substr(2, 10)))
+                    const process = () => {
+                        return this.download(Math.random().toString(36).substr(2, 10)).then(() => {
+                            return process()
+                        }).catch(e => {
+                            if (axios.isCancel(e)) {
+                                console.log("cancel")
                             }
-                            Promise.all(task).finally(resolve)
                         })
-                    } while (this.set.status && this.set.infinite)
+                    }
+                    for (let i = 0; i < this.set.thread; i++) {
+                        process()
+                    }
                 } else {
                     clearInterval(this.timer)
                     this.cancelSource.cancel()
@@ -142,7 +145,6 @@
                 let loaded = 0
                 let speed = 0
                 let timestamp = new Date().getTime()
-                let that = this
                 const index = this.tasks.push(speed) - 1
                 return request({
                     url: this.set.input,
@@ -150,12 +152,12 @@
                         [id]: id,
                     },
                     cancelToken: this.cancelSource.token,
-                    onDownloadProgress: function (progressEvent) {
+                    onDownloadProgress: (progressEvent) => {
                         // 处理原生进度事件
                         const now = new Date().getTime();
                         speed = (progressEvent.loaded - loaded) / (now - timestamp) * 1000
-                        that.tasks[index] = speed
-                        that.waste += progressEvent.loaded - loaded
+                        this.tasks[index] = speed
+                        this.waste += progressEvent.loaded - loaded
                         loaded = progressEvent.loaded
                         timestamp = now
                     },
@@ -163,9 +165,11 @@
                     if (!axios.isCancel(e)) {
                         $message.error(e)
                         this.set.status = false
+                    } else {
+                        throw e
                     }
                 }).finally(() => {
-                    delete that.tasks[index]
+                    delete this.tasks[index]
                 })
             },
             secToTime(s) {
