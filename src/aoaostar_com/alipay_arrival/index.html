@@ -119,15 +119,15 @@
                 try {
                     let arr = NoToArr(this.set.input);
                     for (const k in arr) {
-                        arr[k] = `https://cdn.jsdelivr.net/gh/aoaostar/toolbox-plugins@assets/aoaostar_com/alipay_arrival/tts_${arr[k]}.mp3`
+                        arr[k] = `{:plugin_static($plugin.alias)}/tts_${arr[k]}.mp3`
                     }
                     let crunker = new Crunker.default();
                     crunker
                         .fetchAudio(
-                            'https://cdn.jsdelivr.net/gh/aoaostar/toolbox-plugins@assets/aoaostar_com/alipay_arrival/diaoluo_da.mp3',
-                            `https://cdn.jsdelivr.net/gh/aoaostar/toolbox-plugins@assets/aoaostar_com/alipay_arrival/tts_${this.set.type}.mp3`,
+                            '{:plugin_static($plugin.alias)}/diaoluo_da.mp3',
+                            `{:plugin_static($plugin.alias)}/tts_${this.set.type}.mp3`,
                             ...arr,
-                            'https://cdn.jsdelivr.net/gh/aoaostar/toolbox-plugins@assets/aoaostar_com/alipay_arrival/tts_yuan.mp3',
+                            '{:plugin_static($plugin.alias)}/tts_yuan.mp3',
                         )
                         .then((buffers) => crunker.concatAudio(buffers))
                         .then((merged) => crunker.export(merged, 'audio/mp3'))

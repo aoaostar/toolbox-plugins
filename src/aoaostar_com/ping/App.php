@@ -8,6 +8,6 @@ class App implements Drive
 {
     public function Index()
     {
-        return msg("ok","success",plugin_info_get());
+        return msg("ok", "success");
     }
 }

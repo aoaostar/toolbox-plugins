@@ -16,6 +16,7 @@ class Install implements \plugin\Install
         $model->desc = '通过域名可查询该域名是否有备案及相关的ICP备案许可信息。';
         $model->version = 'v1.0';
     }
+
     # 卸载时运行方法
     public function UnInstall(Plugin $model)
     {
