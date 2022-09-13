@@ -1,0 +1,76 @@
+{extend name="layout/plugin_layout" /}
+﻿
+{block name="title"}{$plugin.title} - {$app.title}{/block}
+﻿
+{block name="main"}
+<div class="container mx-auto" id="app">
+    <div class="card lg:card-side bordered shadow-lg">
+        <div class="card-body">
+            <div class="alert shadow-lg">
+                <div class="flex-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#2196f3"
+                         class="w-6 h-6 mx-2">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div class="whitespace-pre-line">1、下载 Zepp Life (原小米运动)注册中国大陆的手机账号(不要使用小米账号登陆，也不要使用第三方账号登录)并设置密码;
+                        2、进入App后，我的 - 选择第三方接入根据提示绑定你想同步数据的项目即可;
+                        3、小米运动 app 的修改数据同步较慢,请直接打开第三方app 查看同步结果;
+                        4、由于已经开始检测刷步，如无法同步的可进入小米运动APP后我的-设置-账号于安全中心-注销账号-清除数据后重新注册即可;
+                        5、部分账号支付宝步数无法同步，但绿色能量正常发放，这是由于支付宝官方已查到步数异常，目前无解只能等待恢复;
+                        6、本工具仅可刷 wx/zfb 的步数，扣扣步数无法同步。
+                    </div>
+                </div>
+            </div>
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text">账号</span>
+                </label>
+                <input v-model="user.username" type="text" placeholder="请输入您的小米运动账号"
+                       class="input input-bordered w-full "/>
+            </div>
+            <div class="form-control  ">
+                <label class="label">
+                    <span class="label-text">密码</span>
+                </label>
+                <input v-model="user.password" type="text" placeholder="请输入您的小米运动密码"
+                       class="input input-bordered  w-full"/>
+            </div>
+            <div class="form-control  ">
+                <label class="label">
+                    <span class="label-text">步数</span>
+                </label>
+                <input v-model="user.step" type="text" placeholder="请输入要刷的步数" class="input input-bordered  w-full"/>
+            </div>
+            <button class="btn mt-4" @click="submit">提交</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            user: {
+                username: '',
+                password: '',
+                step: '',
+            }
+        },
+        created() {
+        },
+        methods: {
+            submit() {
+                const loading = $message.loading('正在提交给跑步机中');
+                return httpPost('/api/{$plugin.alias}', {
+                        ...this.user
+                    }
+                ).then(res => {
+                    $message.success(res.message)
+                }).finally(() => loading.close())
+            }
+        },
+    })
+</script>
+
+{/block}

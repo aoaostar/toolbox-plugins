@@ -65,7 +65,7 @@
         },
         methods: {
             query() {
-                let loading = $message.loading('正在查询中');
+                const loading = $message.loading('正在查询中');
                 return httpPost('/api/{$plugin.alias}/query', {
                         domain: this.set.input
                     }
