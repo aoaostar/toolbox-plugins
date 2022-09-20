@@ -23,10 +23,12 @@
         ├─boce
         ├─bullshit_generator
         ├─byte_calc
+        ├─carbon
         ├─code_css
         ├─code_html
         ├─code_js
         ├─core_values
+        ├─drcom
         ├─emoji
         ├─encrypt
         ├─example
@@ -52,6 +54,7 @@
         ├─random_anime_images
         ├─random_beauty_images
         ├─rand_password
+        ├─rentry
         ├─roll_call
         ├─rsa
         ├─seo
@@ -59,6 +62,7 @@
         ├─special_symbols
         ├─speech_synthesis
         ├─str_count
+        ├─subconverter
         ├─timestamp
         ├─urlencode
         ├─uuid
