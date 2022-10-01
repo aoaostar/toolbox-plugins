@@ -35,6 +35,7 @@
         ├─file_hash
         ├─github_image_hosting
         ├─github_proxy
+        ├─gq_avatar
         ├─hash
         ├─hex_convert
         ├─icp
