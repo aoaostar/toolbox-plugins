@@ -65,6 +65,7 @@
         ├─str_count
         ├─subconverter
         ├─timestamp
+        ├─tz
         ├─urlencode
         ├─uuid
         ├─youth_learning

@@ -148,10 +148,10 @@
                 for (const file of e.target.files) {
                     list.push({
                         key: `<div class="font-bold">${file.name}</div>`,
-                        value: `<div class="font-bold">${file.type} - ${file.size} bytes</div>`,
+                        value: `<div class="font-bold">${file.type ? file.type : '未知类型'} - ${changeFilesize(file.size)}</div>`,
                     })
                     for (const v of Object.keys(this.set)) {
-                        if (this.set[v]){
+                        if (this.set[v]) {
                             await this.hash(file, v.toUpperCase()).then(res => {
                                 list.push({
                                     key: `${v}`,

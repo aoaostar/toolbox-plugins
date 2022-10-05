@@ -1,0 +1,520 @@
+{extend name="layout/plugin_layout" /}
+﻿
+{block name="title"}{$plugin.title} - {$app.title}{/block}
+﻿
+﻿{block name="head"}
+<style>
+    .tooltip.tooltip-open:after, .tooltip.tooltip-open:before, .tooltip:hover:after, .tooltip:hover:before {
+        white-space: pre-wrap;
+    }
+</style>
+{/block}
+{block name="main"}
+<div class="container mx-auto" id="app">
+    <div class="card lg:card-side bordered shadow-lg mb-4">
+        <div class="card-body">
+            <h2 class="card-title">服务器状态</h2>
+            <div class="grid gap-4 grid-cols-2 md:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-5 mt-4">
+                <div class="flex flex-col items-center tooltip"
+                     :data-tip="`最近1分钟平均负载${server.serverStatus.sysLoad[0]}\n最近5分钟平均负载${server.serverStatus.sysLoad[1]}\n最近15分钟平均负载${server.serverStatus.sysLoad[2]}`">
+                    <div class="mb-2">系统负载</div>
+                    <div class="text-base my-4">
+                        <div class="radial-progress"
+                             :style="{'--value':server.serverStatus.sysLoad.percentage}">
+                            {{ server.serverStatus.sysLoad.percentage }}%
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="mb-2">CPU占用</div>
+                    <div class="text-base my-4">
+                        <div class="radial-progress" :style="{'--value':server.serverStatus.cpuUsage.percentage}">
+                            {{ server.serverStatus.cpuUsage.percentage}}%
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="mb-2">真实内存占用</div>
+                    <div class="text-base my-4">
+                        <div class="radial-progress" :style="{'--value':server.serverStatus.memRealUsage.percentage}">
+                            {{ server.serverStatus.memRealUsage.percentage }}%
+                        </div>
+                    </div>
+                    <div class="text-sm">
+                        {{ changeFilesize(server.serverStatus.memRealUsage.value) }}/{{
+                        changeFilesize(server.serverStatus.memRealUsage.max) }}
+                    </div>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="mb-2">磁盘使用量</div>
+                    <div class="text-base my-4">
+                        <div class="radial-progress" :style="{'--value':server.serverStatus.diskUsage.percentage}">
+                            {{ server.serverStatus.diskUsage.percentage}}%
+                        </div>
+                    </div>
+                    <div class="text-sm">
+                        {{ changeFilesize(server.serverStatus.diskUsage.value) }}/{{
+                        changeFilesize(server.serverStatus.diskUsage.max) }}
+                    </div>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="mb-2">内存缓存</div>
+                    <div class="text-base my-4">
+                        <div class="radial-progress" :style="{'--value':server.serverStatus.memCached.percentage}">
+                            {{server.serverStatus.memCached.percentage}}%
+                        </div>
+                    </div>
+                    <div class="text-sm">
+                        {{ changeFilesize(server.serverStatus.memCached.value) }}/{{
+                        changeFilesize(server.serverStatus.memCached.max) }}
+                    </div>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="mb-2">内存缓冲</div>
+                    <div class="text-base my-4">
+                        <div class="radial-progress" :style="{'--value':server.serverStatus.memBuffers.percentage}">
+                            {{server.serverStatus.memBuffers.percentage}}%
+                        </div>
+                    </div>
+                    <div class="text-sm">
+                        {{ changeFilesize(server.serverStatus.memBuffers.value) }}/{{
+                        changeFilesize(server.serverStatus.memBuffers.max) }}
+                    </div>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="mb-2">SWAP 占用</div>
+                    <div class="text-base my-4">
+                        <div class="radial-progress" :style="{'--value':server.serverStatus.swapUsage.percentage}">
+                            {{server.serverStatus.swapUsage.percentage}}%
+                        </div>
+                    </div>
+                    <div class="text-sm">
+                        {{ changeFilesize(server.serverStatus.swapUsage.value) }}/{{
+                        changeFilesize(server.serverStatus.swapUsage.max) }}
+                    </div>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="mb-2">SWAP 缓存</div>
+                    <div class="text-base my-4">
+                        <div class="radial-progress" :style="{'--value':server.serverStatus.swapCached.percentage}">
+                            {{server.serverStatus.swapCached.percentage}}%
+                        </div>
+                    </div>
+                    <div class="text-sm">
+                        {{ changeFilesize(server.serverStatus.swapCached.value) }}/{{
+                        changeFilesize(server.serverStatus.swapCached.max) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card lg:card-side bordered shadow-lg mb-4">
+        <div class="card-body">
+            <h2 class="card-title">流量统计</h2>
+            <div class="text-sm px-2">
+                <div class="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 " v-if="server.networkStats.networks">
+                    <div class="flex items-center mt-4" v-for="(v,k) in server.networkStats.networks" :key="k">
+                        <div class="font-bold mr-4 w-3/5">{{ v.id }}</div>
+                        <div class="flex gap-4 w-full">
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                     stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M12 4.5v15m0 0l6.75-6.75M12 19.5l-6.75-6.75"/>
+                                </svg>
+                                <div class="flex flex-col">
+                                    <div>
+                                        {{ changeFilesize(v.rx) }}
+                                    </div>
+                                    <div v-if="v?.percentage?.rx">
+                                        {{changeDownloadSpeed(v.percentage.rx)}}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                     stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M12 19.5v-15m0 0l-6.75 6.75M12 4.5l6.75 6.75"/>
+                                </svg>
+                                <div class="flex flex-col">
+                                    <div>
+                                        {{ changeFilesize(v.tx) }}
+                                    </div>
+                                    <div v-if="v?.percentage?.rx">
+                                        {{changeDownloadSpeed(v.percentage.tx)}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div v-else class="text-center">
+                    无
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card lg:card-side bordered shadow-lg mb-4">
+        <div class="card-body">
+            <h2 class="card-title">服务器信息</h2>
+            <div class="text-sm px-2">
+                <div class="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 ">
+                    <div class="flex items-center mt-4">
+                        <div class="font-bold mr-4 w-20">服务器名</div>
+                        <div>{{ serverInfo.serverName }}</div>
+                    </div>
+                    <div class="flex items-center mt-4">
+                        <div class="font-bold mr-4 w-20">服务器时间</div>
+                        <div>{{ serverInfo.serverTime }}</div>
+                    </div>
+                    <div class="flex items-center mt-4">
+                        <div class="font-bold mr-4 w-20">
+                            持续运作时间
+                        </div>
+                        <div>
+                            {{serverInfo.serverUptime.days}} 天
+                            {{serverInfo.serverUptime.hours}} 时
+                            {{serverInfo.serverUptime.mins}} 分
+                            {{serverInfo.serverUptime.secs}} 秒
+                        </div>
+                    </div>
+                    <div class="flex items-center mt-4">
+                        <div class="font-bold mr-4 w-20">服务器IP</div>
+                        <div>{{ serverInfo.serverIp }}</div>
+                    </div>
+                    <div class="flex items-center mt-4">
+                        <div class="font-bold mr-4 w-20">CPU 型号</div>
+                        <div>{{ serverInfo.cpuModel?serverInfo.cpuModel:'不可用' }}</div>
+                    </div>
+                    <div class="flex items-center mt-4">
+                        <div class="font-bold mr-4 w-20">管理员邮箱</div>
+                        <div>{{ serverInfo.serverAdmin }}</div>
+                    </div>
+                </div>
+                <div class="flex items-center mt-4">
+                    <div class="font-bold mr-4 w-20">服务器软件</div>
+                    <div class="break-all">{{ serverInfo.serverSoftware }}</div>
+                </div>
+                <div class="flex items-center mt-4">
+                    <div class="font-bold mr-4 w-20">服务器系统</div>
+                    <div class="break-all">{{ serverInfo.serverOs }}</div>
+                </div>
+                <div class="flex items-center mt-4">
+                    <div class="font-bold mr-4 w-20">脚本路径</div>
+                    <div class="break-all">{{ serverInfo.scriptPath }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card lg:card-side bordered shadow-lg mb-4">
+        <div class="card-body">
+            <h2 class="card-title">PHP信息</h2>
+            <div class="text-sm px-2">
+                <div class="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
+                    <div class="flex items-center">
+                        <div class="font-bold mr-4 w-3/5">版本</div>
+                        <div>
+                            {{ phpInfo.version }}
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="font-bold mr-4 w-3/5">Zend版本</div>
+                        <div>
+                            {{ phpInfo.zend_version }}
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="font-bold mr-4 w-3/5">服务器时间</div>
+                        <div>
+                            {{ phpInfo.sapi }}
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="font-bold mr-4 w-3/5">显示错误</div>
+                        <div>
+                            <div class="badge cursor-pointer" :class="{
+                            'badge-success':phpInfo.displayErrors,
+                            }">
+                                {{ phpInfo.displayErrors }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="font-bold mr-4 w-3/5">错误报告</div>
+                        <div>{{ phpInfo.errorReporting }}</div>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="font-bold mr-4 w-3/5">运行内存限制</div>
+                        <div>{{ phpInfo.memoryLimit }}</div>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="font-bold mr-4 w-3/5">POST 提交限制</div>
+                        <div>{{ phpInfo.postMaxSize}}</div>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="font-bold mr-4 w-3/5">上传文件限制</div>
+                        <div>{{ phpInfo.uploadMaxFilesize }}</div>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="font-bold mr-4 w-3/5">提交表单限制</div>
+                        <div>{{ phpInfo.maxInputVars }}</div>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="font-bold mr-4 w-3/5">运行超时秒数</div>
+                        <div>{{ phpInfo.maxExecutionTime }}</div>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="font-bold mr-4 w-3/5">Socket 超时秒数</div>
+                        <div>{{ phpInfo.defaultSocketTimeout }}</div>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="font-bold mr-4 w-3/5">文件远端打开</div>
+                        <div class="badge cursor-pointer" :class="{
+                            'badge-success':phpInfo.allowUrlFopen,
+                            }">
+                            {{ phpInfo.allowUrlFopen }}
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="font-bold mr-4 w-3/5">SMTP 支持</div>
+                        <div class="badge cursor-pointer" :class="{
+                            'badge-success':phpInfo.smtp,
+                            }">
+                            {{ phpInfo.smtp }}
+                        </div>
+                    </div>
+                </div>
+                <div class="flex mt-4 flex-col md:flex-row gap-4">
+                    <div class="font-bold ">已禁用的函数</div>
+                    <div class="flex flex-wrap gap-2 flex-1">
+                        <div class="badge badge-outline cursor-pointer " v-for="(v,key) in phpInfo.disableFunctions"
+                             :key="key">
+                            {{v}}
+                        </div>
+                    </div>
+                </div>
+                <div class="flex mt-4 flex-col md:flex-row gap-4">
+                    <div class="font-bold ">已禁用的类</div>
+                    <div class="flex flex-wrap gap-2 flex-1">
+                        <div class="badge badge-outline cursor-pointer" v-for="(v,key) in phpInfo.disableClasses"
+                             :key="key">
+                            {{v}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card lg:card-side bordered shadow-lg mb-4">
+        <div class="card-body">
+            <h2 class="card-title">PHP扩展</h2>
+            <div class="text-sm px-2">
+                <div class="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
+                    <div class="flex items-center" v-for="(v,k) in phpExtensions" :key="k"
+                         v-if="typeof v === 'boolean'">
+                        <div class="font-bold mr-4 w-3/5">{{k}}</div>
+                        <div class="badge cursor-pointer" :class="{
+                            'badge-success':v,
+                            }">
+                            {{ v }}
+                        </div>
+                    </div>
+                </div>
+                <div class="flex mt-4 flex-col md:flex-row gap-4">
+                    <div class="font-bold">已加载的扩展</div>
+                    <div class="flex flex-wrap gap-2 flex-1">
+                        <div class="badge badge-outline cursor-pointer"
+                             v-for="(value,key) in phpExtensions.loadedExtensions"
+                             :key="key">
+                            {{value}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card lg:card-side bordered shadow-lg mb-4">
+        <div class="card-body">
+            <h2 class="card-title">数据库</h2>
+            <div class="text-sm px-2">
+                <div class="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
+                    <div class="flex items-center" v-for="(v,k) in database" :key="k"
+                         v-if="typeof v === 'boolean'">
+                        <div class="font-bold mr-4 w-3/5">{{k}}</div>
+                        <div class="badge cursor-pointer" :class="{
+                            'badge-success':v,
+                            }">
+                            {{ v }}
+                        </div>
+                    </div>
+                </div>
+                <div class="flex mt-4 flex-col md:flex-row gap-4" v-if="database.pdo">
+                    <div class="font-bold">PDO</div>
+                    <div class="flex flex-wrap gap-2 flex-1">
+                        <div class="badge badge-outline cursor-pointer"
+                             v-for="(value,key) in database.pdo"
+                             :key="key">
+                            {{value}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const INTERVAL_TIME = 1000
+    new Vue({
+        el: '#app',
+        watch: {
+            'server.networkStats.networks': {
+                deep: true,
+                handler(newV, oldV) {
+                    for (const index in newV) {
+                        newV[index].percentage = {
+                            tx: newV[index].tx - (oldV[index]?.tx || newV[index].tx),
+                            rx: newV[index].rx - (oldV[index]?.rx || newV[index].rx),
+                        }
+                    }
+                }
+            },
+        },
+        data: {
+            server: {
+                "networkStats": {"networks": [], "timestamp": 1664786009},
+                "serverStatus": {
+                    "sysLoad": {
+                        ...[0, 0, 0],
+                        "percentage": 0,
+                    },
+                    "cpuUsage": {"user": 0, "nice": 0, "sys": 0, "idle": 0, "percentage": 0},
+                    "memRealUsage": {"value": 0, "max": 0, "percentage": 0},
+                    "memBuffers": {"value": 0, "max": 0, "percentage": 0},
+                    "memCached": {"value": 0, "max": 0, "percentage": 0},
+                    "swapUsage": {"value": 0, "max": 0, "percentage": 0},
+                    "swapCached": {"value": 0, "max": 0, "percentage": 0},
+                    "diskUsage": {"value": 0, "max": 0, "percentage": 0}
+                }
+            },
+            "serverInfo": {
+                "serverName": "",
+                "serverAdmin": "i@aoaostar.com",
+                "serverUtcTime": "",
+                "serverTime": "",
+                "serverUptime": {
+                    "days": 0,
+                    "hours": 0,
+                    "mins": 0,
+                    "secs": 0
+                },
+                "serverIp": "",
+                "serverSoftware": "",
+                "phpVersion": "",
+                "cpuModel": "",
+                "serverOs": "",
+                "scriptPath": "",
+            },
+            phpInfo: {
+                "version": "",
+                "zend_version": "",
+                "sapi": "",
+                "displayErrors": false,
+                "errorReporting": 0,
+                "memoryLimit": "",
+                "postMaxSize": "",
+                "uploadMaxFilesize": "",
+                "maxInputVars": 0,
+                "maxExecutionTime": 0,
+                "defaultSocketTimeout": 0,
+                "allowUrlFopen": false,
+                "smtp": false,
+                "disableFunctions": [],
+                "disableClasses": []
+            },
+            phpExtensions: {
+                loadedExtensions: []
+            },
+            database: {},
+
+        },
+        created() {
+            this.get_server_info().finally(() => {
+                setInterval(() => {
+                    let time = new Date(this.serverInfo.serverTime).getTime() + 1000;
+                    this.serverInfo.serverTime = dateFormat(new Date(time))
+                }, 1000)
+                setInterval(() => {
+                    this.serverInfo.serverUptime.secs++
+                    if (this.serverInfo.serverUptime.secs >= 60) {
+                        this.serverInfo.serverUptime.secs = 0
+                        this.serverInfo.serverUptime.mins++
+                    }
+                    if (this.serverInfo.serverUptime.mins >= 60) {
+                        this.serverInfo.serverUptime.mins = 0
+                        this.serverInfo.serverUptime.hours++
+                    }
+                    if (this.serverInfo.serverUptime.hours >= 24) {
+                        this.serverInfo.serverUptime.hours = 0
+                        this.serverInfo.serverUptime.days++
+                    }
+                }, 1000)
+            })
+            this.get_php_info()
+            this.get_php_extensions()
+            this.get_database()
+            const func = () => this.get_server_status().finally(() => {
+                setTimeout(func, INTERVAL_TIME)
+            })
+            func()
+
+        },
+        methods: {
+            get_server_status() {
+                return httpGet('/api/{$plugin.alias}').then(resp => {
+                    for (const k in resp.data) {
+                        for (const key in resp.data[k]) {
+                            let item = resp.data[k][key]
+                            if (key === 'sysLoad') {
+                                item.percentage = (item[0] * 100).toFixed(2)
+                                continue
+                            }
+                            if (key === 'cpuUsage') {
+                                item.percentage = (100 - item.idle).toFixed(2)
+                                continue
+                            }
+                            if (typeof item === 'object' && item !== null && item.hasOwnProperty('value') && item.hasOwnProperty('max')) {
+                                const percentage = (item.value / item.max * 100).toFixed(2)
+                                item.percentage = !isNaN(percentage) ? percentage : 0
+                            }
+                        }
+                    }
+                    this.server = resp.data
+                })
+            },
+            get_server_info() {
+                return httpGet('/api/{$plugin.alias}/server_info').then(resp => {
+                    this.serverInfo = resp.data
+                })
+            },
+            get_php_info() {
+                return httpGet('/api/{$plugin.alias}/php_info').then(resp => {
+                    this.phpInfo = resp.data
+                })
+            },
+            get_php_extensions() {
+                return httpGet('/api/{$plugin.alias}/php_extensions').then(resp => {
+                    this.phpExtensions = resp.data
+                })
+            },
+            get_database() {
+                return httpGet('/api/{$plugin.alias}/database').then(resp => {
+                    this.database = resp.data
+                })
+            },
+        },
+    })
+</script>
+
+{/block}
