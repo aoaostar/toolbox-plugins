@@ -3,11 +3,6 @@
 {block name="title"}{$plugin.title} - {$app.title}{/block}
 ﻿
 ﻿{block name="head"}
-<style>
-    .table td {
-        white-space: normal;
-    }
-</style>
 {/block}
 {block name="main"}
 <div class="container mx-auto" id="app">
@@ -32,151 +27,40 @@
                         <img class="max-w-xs cursor-pointer" :src="captcha" alt="">
                     </div>
                     <input v-model="input.captcha" type="text" placeholder="请输入验证码"
-                           class="input input-bordered w-full "/>
+                           class="input input-bordered w-full" @keyup.enter="analysis"/>
                 </div>
             </div>
 
             <button class="btn btn-block mt-4" @click="analysis">
                 解析
             </button>
-            <div class="mt-4 " v-if="result.aweme_id">
-                <table class="table w-full break-all">
-                    <tr>
-                        <th>耗时</th>
-                        <td>{{result.analyze_time}}s</td>
-                    </tr>
-                    <tr>
-                        <th>标题</th>
-                        <td>{{result.desc}}</td>
-                    </tr>
-                    <tr>
-                        <th>作者</th>
-                        <td>
-                            {{result.author.nickname}}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>发布时间</th>
-                        <td>
-                            {{result.create_time}}
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <th>封面</th>
-                        <td>
-                            {{result.video.cover}}
-                        </td>
-                        <td>
-                            <button class="btn btn-circle btn-outline" @click="copy(result.video.cover)">
-                                <svg class="fill-current w-6 h-6" viewBox="0 0 1024 1024"
-                                     xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M720 192h-544A80.096 80.096 0 0 0 96 272v608C96 924.128 131.904 960 176 960h544c44.128 0 80-35.872 80-80v-608C800 227.904 764.128 192 720 192z m16 688c0 8.8-7.2 16-16 16h-544a16 16 0 0 1-16-16v-608a16 16 0 0 1 16-16h544a16 16 0 0 1 16 16v608z"
-                                    ></path>
-                                    <path d="M848 64h-544a32 32 0 0 0 0 64h544a16 16 0 0 1 16 16v608a32 32 0 1 0 64 0v-608C928 99.904 892.128 64 848 64z"
-                                    ></path>
-                                    <path d="M608 360H288a32 32 0 0 0 0 64h320a32 32 0 1 0 0-64zM608 520H288a32 32 0 1 0 0 64h320a32 32 0 1 0 0-64zM480 678.656H288a32 32 0 1 0 0 64h192a32 32 0 1 0 0-64z"
-                                    ></path>
-                                </svg>
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>动态封面</th>
-                        <td>
-                            {{result.video.dynamic_cover}}
-                        </td>
-                        <td>
-                            <button class="btn btn-circle btn-outline" @click="copy(result.video.dynamic_cover)">
-                                <svg class="fill-current w-6 h-6" viewBox="0 0 1024 1024"
-                                     xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M720 192h-544A80.096 80.096 0 0 0 96 272v608C96 924.128 131.904 960 176 960h544c44.128 0 80-35.872 80-80v-608C800 227.904 764.128 192 720 192z m16 688c0 8.8-7.2 16-16 16h-544a16 16 0 0 1-16-16v-608a16 16 0 0 1 16-16h544a16 16 0 0 1 16 16v608z"
-                                    ></path>
-                                    <path d="M848 64h-544a32 32 0 0 0 0 64h544a16 16 0 0 1 16 16v608a32 32 0 1 0 64 0v-608C928 99.904 892.128 64 848 64z"
-                                    ></path>
-                                    <path d="M608 360H288a32 32 0 0 0 0 64h320a32 32 0 1 0 0-64zM608 520H288a32 32 0 1 0 0 64h320a32 32 0 1 0 0-64zM480 678.656H288a32 32 0 1 0 0 64h192a32 32 0 1 0 0-64z"
-                                    ></path>
-                                </svg>
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>music下载地址</th>
-                        <td>
-                            {{result.music.play_url}}
-                        </td>
-                        <td>
-                            <button class="btn btn-circle btn-outline" @click="copy(result.music.play_url)">
-                                <svg class="fill-current w-6 h-6" viewBox="0 0 1024 1024"
-                                     xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M720 192h-544A80.096 80.096 0 0 0 96 272v608C96 924.128 131.904 960 176 960h544c44.128 0 80-35.872 80-80v-608C800 227.904 764.128 192 720 192z m16 688c0 8.8-7.2 16-16 16h-544a16 16 0 0 1-16-16v-608a16 16 0 0 1 16-16h544a16 16 0 0 1 16 16v608z"
-                                    ></path>
-                                    <path d="M848 64h-544a32 32 0 0 0 0 64h544a16 16 0 0 1 16 16v608a32 32 0 1 0 64 0v-608C928 99.904 892.128 64 848 64z"
-                                    ></path>
-                                    <path d="M608 360H288a32 32 0 0 0 0 64h320a32 32 0 1 0 0-64zM608 520H288a32 32 0 1 0 0 64h320a32 32 0 1 0 0-64zM480 678.656H288a32 32 0 1 0 0 64h192a32 32 0 1 0 0-64z"
-                                    ></path>
-                                </svg>
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>有水印下载地址</th>
-                        <td>
-                            {{result.video.play_addr.vm}}
-                        </td>
-                        <td>
-                            <button class="btn btn-circle btn-outline" @click="copy(result.video.play_addr.vm)">
-                                <svg class="fill-current w-6 h-6" viewBox="0 0 1024 1024"
-                                     xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M720 192h-544A80.096 80.096 0 0 0 96 272v608C96 924.128 131.904 960 176 960h544c44.128 0 80-35.872 80-80v-608C800 227.904 764.128 192 720 192z m16 688c0 8.8-7.2 16-16 16h-544a16 16 0 0 1-16-16v-608a16 16 0 0 1 16-16h544a16 16 0 0 1 16 16v608z"
-                                    ></path>
-                                    <path d="M848 64h-544a32 32 0 0 0 0 64h544a16 16 0 0 1 16 16v608a32 32 0 1 0 64 0v-608C928 99.904 892.128 64 848 64z"
-                                    ></path>
-                                    <path d="M608 360H288a32 32 0 0 0 0 64h320a32 32 0 1 0 0-64zM608 520H288a32 32 0 1 0 0 64h320a32 32 0 1 0 0-64zM480 678.656H288a32 32 0 1 0 0 64h192a32 32 0 1 0 0-64z"
-                                    ></path>
-                                </svg>
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>无水印下载地址</th>
-                        <td>
-                            {{result.video.play_addr.nvm}}
-                        </td>
-                        <td>
-                            <button class="btn btn-circle btn-outline" @click="copy(result.video.play_addr.nvm)">
-                                <svg class="fill-current w-6 h-6" viewBox="0 0 1024 1024"
-                                     xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M720 192h-544A80.096 80.096 0 0 0 96 272v608C96 924.128 131.904 960 176 960h544c44.128 0 80-35.872 80-80v-608C800 227.904 764.128 192 720 192z m16 688c0 8.8-7.2 16-16 16h-544a16 16 0 0 1-16-16v-608a16 16 0 0 1 16-16h544a16 16 0 0 1 16 16v608z"
-                                    ></path>
-                                    <path d="M848 64h-544a32 32 0 0 0 0 64h544a16 16 0 0 1 16 16v608a32 32 0 1 0 64 0v-608C928 99.904 892.128 64 848 64z"
-                                    ></path>
-                                    <path d="M608 360H288a32 32 0 0 0 0 64h320a32 32 0 1 0 0-64zM608 520H288a32 32 0 1 0 0 64h320a32 32 0 1 0 0-64zM480 678.656H288a32 32 0 1 0 0 64h192a32 32 0 1 0 0-64z"
-                                    ></path>
-                                </svg>
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>无水印1080P下载地址</th>
-                        <td>
-                            {{result.video.play_addr.nvm_1080p}}
-                        </td>
-                        <td>
-                            <button class="btn btn-circle btn-outline" @click="copy(result.video.play_addr.nvm_1080p)">
-                                <svg class="fill-current w-6 h-6" viewBox="0 0 1024 1024"
-                                     xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M720 192h-544A80.096 80.096 0 0 0 96 272v608C96 924.128 131.904 960 176 960h544c44.128 0 80-35.872 80-80v-608C800 227.904 764.128 192 720 192z m16 688c0 8.8-7.2 16-16 16h-544a16 16 0 0 1-16-16v-608a16 16 0 0 1 16-16h544a16 16 0 0 1 16 16v608z"
-                                    ></path>
-                                    <path d="M848 64h-544a32 32 0 0 0 0 64h544a16 16 0 0 1 16 16v608a32 32 0 1 0 64 0v-608C928 99.904 892.128 64 848 64z"
-                                    ></path>
-                                    <path d="M608 360H288a32 32 0 0 0 0 64h320a32 32 0 1 0 0-64zM608 520H288a32 32 0 1 0 0 64h320a32 32 0 1 0 0-64zM480 678.656H288a32 32 0 1 0 0 64h192a32 32 0 1 0 0-64z"
-                                    ></path>
-                                </svg>
-                            </button>
-                        </td>
-                    </tr>
-                </table>
+            <div class="mt-4 w-full " v-if="result.length>0">
+                <div class="flex flex-col  items-center p-3 gap-4 md:flex-row" v-for="(item,k) in result" :key="k">
+                    <div class="font-bold text-center md:text-left w-44">
+                        {{item.label}}
+                    </div>
+                    <div class="flex-1 break-all">
+                        <a v-if="item.copy" :href="item.value" target="_blank">
+                            {{item.value}}
+                        </a>
+                        <span v-else>
+                            {{item.value}}
+                        </span>
+                    </div>
+                    <div v-if="item.copy" class="tooltip" data-tip="点击复制">
+                        <button class="btn btn-circle btn-outline" @click="copy(item.value)">
+                            <svg class="fill-current w-6 h-6" viewBox="0 0 1024 1024"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path d="M720 192h-544A80.096 80.096 0 0 0 96 272v608C96 924.128 131.904 960 176 960h544c44.128 0 80-35.872 80-80v-608C800 227.904 764.128 192 720 192z m16 688c0 8.8-7.2 16-16 16h-544a16 16 0 0 1-16-16v-608a16 16 0 0 1 16-16h544a16 16 0 0 1 16 16v608z"
+                                ></path>
+                                <path d="M848 64h-544a32 32 0 0 0 0 64h544a16 16 0 0 1 16 16v608a32 32 0 1 0 64 0v-608C928 99.904 892.128 64 848 64z"
+                                ></path>
+                                <path d="M608 360H288a32 32 0 0 0 0 64h320a32 32 0 1 0 0-64zM608 520H288a32 32 0 1 0 0 64h320a32 32 0 1 0 0-64zM480 678.656H288a32 32 0 1 0 0 64h192a32 32 0 1 0 0-64z"
+                                ></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -191,10 +75,70 @@
                 captcha: '',
             },
             captcha: '',
-            result: {},
+            douyinAnalysis: [],
         },
         created() {
             this.refreshCaptcha()
+        },
+        computed: {
+            result() {
+                if (this.douyinAnalysis.length <= 0) {
+                    return []
+                }
+                return [
+                    {
+                        label: '耗时',
+                        value: this.douyinAnalysis.analyze_time,
+                        copy: false,
+                    },
+                    {
+                        label: '标题',
+                        value: this.douyinAnalysis.desc,
+                        copy: false,
+                    },
+                    {
+                        label: '作者',
+                        value: this.douyinAnalysis.author.nickname,
+                        copy: false,
+                    },
+                    {
+                        label: '发布时间',
+                        value: this.douyinAnalysis.create_time,
+                        copy: false,
+                    },
+                    {
+                        label: '封面',
+                        value: this.douyinAnalysis.video.cover,
+                        copy: true,
+                    },
+                    {
+                        label: '动态封面',
+                        value: this.douyinAnalysis.video.dynamic_cover,
+                        copy: true,
+                    },
+                    {
+                        label: 'music下载地址',
+                        value: this.douyinAnalysis.music.play_url,
+                        copy: true,
+                    },
+                    {
+                        label: '有水印下载地址',
+                        value: this.douyinAnalysis.video.play_addr.vm,
+                        copy: true,
+                    },
+                    {
+                        label: '无水印下载地址',
+                        value: this.douyinAnalysis.video.play_addr.nvm,
+                        copy: true,
+                    },
+                    {
+                        label: '无水印1080P下载地址',
+                        value: this.douyinAnalysis.video.play_addr.nvm_1080p,
+                        copy: true,
+                    },
+                ]
+            }
+
         },
         methods: {
             analysis() {
@@ -202,7 +146,7 @@
                 httpPost('{:plugin_api()}', {
                     ...this.input,
                 }).then(resp => {
-                    this.result = resp.data
+                    this.douyinAnalysis = resp.data
                 }).finally(() => {
                     this.refreshCaptcha()
                     loading.close()

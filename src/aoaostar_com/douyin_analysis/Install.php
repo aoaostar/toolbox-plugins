@@ -19,7 +19,7 @@ class Install implements \plugin\Install
         # 描述
         $model->desc = '抖音短视频无水印解析';
         # 版本号
-        $model->version = 'v1.0';
+        $model->version = 'v1.1';
     }
     # 卸载时运行方法
     public function UnInstall(Plugin $model)
