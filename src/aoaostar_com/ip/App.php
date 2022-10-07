@@ -11,7 +11,7 @@ class App implements Drive
 
     public function Index()
     {
-        return msg("ok", "success", plugin_info_get());
+        return success(plugin_info_get());
     }
 
     public function query()
@@ -21,7 +21,7 @@ class App implements Drive
             'ip' => 'ip'
         ]);
         if (!$validate->check(['ip' => $ip])) {
-            return msg('error', $validate->getError());
+            return error($validate->getError());
         }
         if (empty($ip)) {
             $ip = client_ip();
@@ -30,9 +30,9 @@ class App implements Drive
         $get = aoaostar_get('http://whois.pconline.com.cn/ipJson.jsp?json=true&ip=' . $ip);
         $json = json_decode(iconv('gbk', 'utf-8', $get));
         if (empty($get)) {
-            return msg('error', '查询失败，请重试');
+            return error('查询失败，请重试');
         }
-        return msg("ok", "success", [
+        return success([
             'ip' => $json->ip,
             'location' => $json->addr,
         ]);

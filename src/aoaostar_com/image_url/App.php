@@ -33,16 +33,16 @@ class App implements Drive
             'node' => $node,
             'file' => $uploadedFile,
         ])) {
-            return msg('error', $validate->getError());
+            return error($validate->getError());
         }
 
         if (!file_exists("$this->path/nodes/$node/main.php")) {
-            return msg('error', "该节点[$node]不存在");
+            return error("该节点[$node]不存在");
         }
         require "$this->path/nodes/$node/main.php";
 
         if (!class_exists($node)) {
-            return msg('error', "该节点[$node]不存在");
+            return error("该节点[$node]不存在");
         }
         $filename = uniqid() . '.' . $uploadedFile->extension();
         $tmpDir = app()->getRuntimePath() . '/tmp';
@@ -60,7 +60,7 @@ class App implements Drive
             ]);
 
         } catch (\Exception $e) {
-            return msg('error', $e->getMessage());
+            return error($e->getMessage());
         } finally {
             @unlink($tmpDir . DIRECTORY_SEPARATOR . $filename);
         }

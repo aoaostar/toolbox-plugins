@@ -4,7 +4,6 @@ namespace plugin\aoaostar_com\icp;
 
 use plugin\Drive;
 use think\facade\Cache;
-use think\helper\Str;
 
 class App implements Drive
 {
@@ -14,7 +13,7 @@ class App implements Drive
     # 访问/api/example
     public function Index()
     {
-        return msg("ok", "success", plugin_info_get());
+        return success(plugin_info_get());
     }
 
     public function auth()
@@ -49,14 +48,14 @@ class App implements Drive
     public function query_miit_gov()
     {
         if (!$this->auth()) {
-            return msg('error', 'api抽风了，请稍等', $this->data);
+            return error('api抽风了，请稍等', $this->data);
         }
         $ip = rand_ip();
         $domain = request()->param('domain');
 
         $resp = Cache::get(base64_encode(__NAMESPACE__ . __FUNCTION__ . $domain));
         if (!empty($resp)) {
-            return msg('ok', 'success', $resp);
+            return success($resp);
         }
         $aoaostar_post = aoaostar_post('https://hlwicpfwc.miit.gov.cn/icpproject_query/api/icpAbbreviateInfo/queryByCondition',
             json_encode([
@@ -76,23 +75,23 @@ class App implements Drive
         $this->data = $aoaostar_post;
         $json_decode = json_decode($aoaostar_post);
         if (empty($json_decode)) {
-            return msg('error', 'api抽风了，请稍等', $this->data);
+            return error('api抽风了，请稍等', $this->data);
         }
         if (!empty($json_decode->msg) && str_contains($json_decode->msg, 'token过期')) {
             if (!$this->auth()) {
-                return msg('error', 'api抽风了，请稍等', $this->data);
+                return error('api抽风了，请稍等', $this->data);
             }
             return $this->query();
         }
         if (!empty($json_decode->params->list[0])) {
             Cache::set(base64_encode(__NAMESPACE__ . __FUNCTION__ . $domain), $json_decode, 0);
-            return msg('ok', 'success', $json_decode->params->list[0]);
+            return success($json_decode->params->list[0]);
         }
         $message = 'error';
         if (!empty($json_decode->msg)) {
             $message = $json_decode->msg;
         }
-        return msg('error', $message, $json_decode);
+        return error($message, $json_decode);
 
     }
 
@@ -102,11 +101,11 @@ class App implements Drive
         $domain = request()->param('domain');
         $domain = str_ireplace(['http://', 'https://'], '', $domain);
         if (empty($domain) || !is_valid_url('http://' . trim($domain))) {
-            return msg('error', '请输入正确的域名');
+            return error('请输入正确的域名');
         }
         $resp = Cache::get(base64_encode(__NAMESPACE__ . __FUNCTION__ . $domain));
         if (!empty($resp)) {
-            return msg('ok', 'success', $resp);
+            return success($resp);
         }
 
         $aoaostar_get = aoaostar_get('https://icp.chinaz.com/home/info?host=' . $domain);
@@ -123,9 +122,9 @@ class App implements Drive
                 'site_name' => $matches[1][4],
             ];
             Cache::set(base64_encode(__NAMESPACE__ . __FUNCTION__ . $domain), $data, 0);
-            return msg('ok', 'success', $data);
+            return success($data);
         }
-        return msg('error', 'api可能抽风了，请稍后再试', $aoaostar_get);
+        return error('api可能抽风了，请稍后再试', $aoaostar_get);
 
     }
 }

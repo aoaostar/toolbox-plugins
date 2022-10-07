@@ -57,9 +57,9 @@ final class UtilsCpu
             foreach ($server as $cpu) {
                 $total += (int)$cpu->loadpercentage;
             }
-            try{
+            try {
                 $total = (float)$total / \count($server);
-            }catch (Exception $e){
+            } catch (Exception $e) {
 
             }
 

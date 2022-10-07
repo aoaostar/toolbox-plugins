@@ -16,22 +16,22 @@ class App implements Drive
         ]);
         $params = request()->param();
         if (!$validate->check($params)) {
-            return msg("error", $validate->getError());
+            return error($validate->getError());
         }
         $login = $this->login($params['username'], $params['password']);
         if (!$login) {
-            return msg("error", "登录失败，请检查用户名或密码是否正确");
+            return error("登录失败，请检查用户名或密码是否正确");
         }
 
         $app_token = $this->get_app_token($login->login_token);
 
         if (!$app_token) {
-            return msg("error", "获取app_token失败，请重试");
+            return error("获取app_token失败，请重试");
         }
 
         $do_modify = $this->do_modify($login->user_id, $params['step'], $app_token);
         if (!$do_modify) {
-            return msg("error", "修改步数失败，请重试");
+            return error("修改步数失败，请重试");
         }
         return msg("ok", "修改步数成功，当前步数为 {$params['step']}");
     }

@@ -11,7 +11,7 @@ class App implements Drive
 
     public function Index()
     {
-        return msg("ok", "success", plugin_info_get());
+        return success(plugin_info_get());
     }
 
     public function generate()
@@ -23,12 +23,12 @@ class App implements Drive
             'url' => 'require|url'
         ]);
         if (!$validate->check($params)) {
-            return msg('error', $validate->getError());
+            return error($validate->getError());
         }
         $class = "\\plugin\\aoaostar_com\\short_url\\api\\{$params['type']}";
         if (!class_exists($class)) {
 
-            return msg('error', '该接口不存在');
+            return error('该接口不存在');
         }
         $instance = new $class();
         try {
@@ -37,9 +37,9 @@ class App implements Drive
 
         } catch (\Exception $e) {
 
-            return msg('error', $e->getMessage());
+            return error($e->getMessage());
         }
-        return msg('ok', 'success', [
+        return success([
             'short_url' => $shortUrl
         ]);
 

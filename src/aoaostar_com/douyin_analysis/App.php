@@ -2,9 +2,9 @@
 
 namespace plugin\aoaostar_com\douyin_analysis;
 
+use plugin\CheckCaptcha;
 use plugin\Drive;
 use think\facade\Cache;
-use plugin\CheckCaptcha;
 
 class App implements Drive, CheckCaptcha
 {

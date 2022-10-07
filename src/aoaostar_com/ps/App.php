@@ -9,6 +9,6 @@ class App implements Drive
 
     public function Index()
     {
-        return msg("ok", "success");
+        return success();
     }
 }

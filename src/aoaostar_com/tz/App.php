@@ -2,13 +2,13 @@
 
 namespace plugin\aoaostar_com\tz;
 
+use PDO;
 use plugin\aoaostar_com\tz\Utils\UtilsCpu;
 use plugin\aoaostar_com\tz\Utils\UtilsDisk;
 use plugin\aoaostar_com\tz\Utils\UtilsMemory;
 use plugin\aoaostar_com\tz\Utils\UtilsNetwork;
 use plugin\aoaostar_com\tz\Utils\UtilsTime;
 use plugin\Drive;
-use PDO;
 use SQLite3;
 
 class App implements Drive
@@ -69,7 +69,7 @@ class App implements Drive
                 ],
             ]
         ];
-        return msg('ok', 'success', $data);
+        return success($data);
     }
 
     public function server_info()
@@ -88,7 +88,7 @@ class App implements Drive
             'scriptPath' => __FILE__,
             'serverAdmin' => $this->getServerInfo('SERVER_ADMIN'),
         ];
-        return msg('ok', 'success', $data);
+        return success($data);
     }
 
     public function php_info()
@@ -111,7 +111,7 @@ class App implements Drive
             'disableFunctions' => array_filter(explode(',', (string)\ini_get('disable_functions'))),
             'disableClasses' => array_filter(explode(',', (string)\ini_get('disable_classes'))),
         ];
-        return msg('ok', 'success', $data);
+        return success($data);
     }
 
     public function php_extensions()
@@ -159,7 +159,7 @@ class App implements Drive
             'curl' => \function_exists('curl_init'),
             'loadedExtensions' => get_loaded_extensions(),
         ];
-        return msg('ok', 'success', $data);
+        return success($data);
     }
 
     public function database()
@@ -178,6 +178,6 @@ class App implements Drive
             'pdo' => class_exists('PDO') ? PDO::getAvailableDrivers() : false,
 
         ];
-        return msg('ok', 'success', $data);
+        return success($data);
     }
 }

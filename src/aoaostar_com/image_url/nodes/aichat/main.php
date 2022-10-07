@@ -7,7 +7,7 @@ class aichat implements plugin
     {
 
         $data = [
-            'single' =>  new \CURLFile($filepath),
+            'single' => new \CURLFile($filepath),
         ];
 
         $headers = array(
@@ -25,6 +25,6 @@ class aichat implements plugin
         } else {
             $msg = '上传失败';
         }
-        throw new ApiException($msg,$res);
+        throw new ApiException($msg, $res);
     }
 }

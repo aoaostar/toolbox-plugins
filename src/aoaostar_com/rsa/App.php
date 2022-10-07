@@ -42,7 +42,7 @@ class App implements Drive
 
     public function Index()
     {
-        return msg("ok", "success", plugin_info_get());
+        return success(plugin_info_get());
     }
 
     /**
@@ -59,7 +59,7 @@ class App implements Drive
         $pubKey = openssl_pkey_get_details($res);
         openssl_pkey_free($res);
 
-        return msg('ok', 'success', [
+        return success([
             "public_key" => $pubKey["key"],
             "private_key" => $privateKey,
         ]);
@@ -73,15 +73,15 @@ class App implements Drive
     public function private_encrypt()
     {
         if (!is_string($this->origin)) {
-            return msg('error', '加密失败');
+            return error('加密失败');
         }
         try {
             if (openssl_private_encrypt($this->origin, $encrypted, $this->getRsaPrivateKey(), $this->opensslPadding)) {
-                return msg('ok', 'success', base64_encode($encrypted));
+                return success(base64_encode($encrypted));
             }
-            return msg('error', '加密失败');
+            return error('加密失败');
         } catch (\Exception $e) {
-            return msg('error', $e->getMessage());
+            return error($e->getMessage());
         }
     }
 
@@ -93,7 +93,7 @@ class App implements Drive
     public function public_encrypt()
     {
         if (!is_string($this->origin)) {
-            return msg('error', '加密失败');
+            return error('加密失败');
         }
         $dataLength = mb_strlen($this->origin);
         $offet = 0;
@@ -115,11 +115,11 @@ class App implements Drive
             }
 
             if ($string) {
-                return msg('ok', 'success', base64_encode($string));
+                return success(base64_encode($string));
             }
-            return msg('error', '加密失败');
+            return error('加密失败');
         } catch (\Exception $e) {
-            return msg('error', $e->getMessage());
+            return error($e->getMessage());
         }
     }
 
@@ -131,15 +131,15 @@ class App implements Drive
     public function private_decrypt()
     {
         if (!is_string($this->coded)) {
-            return msg('error', '解密失败');
+            return error('解密失败');
         }
         try {
             if (openssl_private_decrypt(base64_decode($this->coded), $decrypted, $this->getRsaPrivateKey(), $this->opensslPadding)) {
-                return msg('ok', 'success', $decrypted);
+                return success($decrypted);
             }
-            return msg('error', '解密失败');
+            return error('解密失败');
         } catch (\Exception $e) {
-            return msg('error', $e->getMessage());
+            return error($e->getMessage());
         }
 
     }
@@ -152,16 +152,16 @@ class App implements Drive
     public function public_decrypt()
     {
         if (!is_string($this->coded)) {
-            return msg('error', '解密失败');
+            return error('解密失败');
         }
 
         try {
             if (openssl_public_decrypt(base64_decode($this->coded), $decrypted, $this->rsaPublicKey, $this->opensslPadding)) {
-                return msg('ok', 'success', $decrypted);
+                return success($decrypted);
             }
-            return msg('error', '解密失败');
+            return error('解密失败');
         } catch (\Exception $e) {
-            return msg('error', $e->getMessage());
+            return error($e->getMessage());
         }
     }
 
@@ -177,11 +177,11 @@ class App implements Drive
         try {
             if (openssl_sign($this->data, $ret, $this->getRsaPrivateKey())) {
                 $ret = base64_encode($ret);
-                return msg('ok', 'success', $ret);
+                return success($ret);
             }
-            return msg('error', '签名失败');
+            return error('签名失败');
         } catch (\Exception $e) {
-            return msg('error', $e->getMessage());
+            return error($e->getMessage());
         }
     }
 
@@ -206,9 +206,9 @@ class App implements Drive
             if ($ret) {
                 return msg('ok', '验签成功，签名正确', $ret);
             }
-            return msg('error', '验签失败，签名不正确');
+            return error('验签失败，签名不正确');
         } catch (\Exception $e) {
-            return msg('error', $e->getMessage());
+            return error($e->getMessage());
         }
     }
 
@@ -219,9 +219,9 @@ class App implements Drive
             if (openssl_verify('aoaostar', $ret, $this->rsaPublicKey) === 1) {
                 return msg('ok', '验证成功，公私钥匹配');
             }
-            return msg('error', '公私钥不匹配');
+            return error('公私钥不匹配');
         } catch (\Exception $e) {
-            return msg('error', $e->getMessage());
+            return error($e->getMessage());
         }
     }
 
@@ -232,9 +232,9 @@ class App implements Drive
             if ($openssl_pkey_get_details && !empty($openssl_pkey_get_details['key'])) {
                 return msg('ok', '导出成功', $openssl_pkey_get_details['key']);
             }
-            return msg('error', '导出失败，私钥不正确');
+            return error('导出失败，私钥不正确');
         } catch (\Exception $e) {
-            return msg('error', $e->getMessage());
+            return error($e->getMessage());
         }
     }
 

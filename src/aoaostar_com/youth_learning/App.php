@@ -10,13 +10,13 @@ class App implements Drive
 
     public function Index()
     {
-        return msg("ok", "success", plugin_info_get());
+        return success(plugin_info_get());
     }
 
     public function S()
     {
-        $title = request()->param('title','“青年大学习”第十三季第一期');
-        $url = request()->param('url','https://h5.cyol.com/special/daxuexi/bd1kh2uw0m/m.html');
+        $title = request()->param('title', '“青年大学习”第十三季第一期');
+        $url = request()->param('url', 'https://h5.cyol.com/special/daxuexi/bd1kh2uw0m/m.html');
         $html = <<<ETO
 <html>
 <head>
