@@ -63,9 +63,17 @@
         ├─short_url
         ├─special_symbols
         ├─speech_synthesis
+        ├─speed_test
         ├─str_count
         ├─subconverter
+        ├─svg_editor
         ├─timestamp
+        ├─translate_baidu
+        ├─translate_bing
+        ├─translate_deepl
+        ├─translate_google
+        ├─translate_volcengine
+        ├─translate_youdao
         ├─tz
         ├─urlencode
         ├─uuid
