@@ -1,20 +1,22 @@
 <?php
 
+namespace plugin\aoaostar_com\image_url;
+
+use Exception;
+use Throwable;
+
 class ApiException extends Exception
 {
 
     private $data = [];
 
-    /**
-     * @return array
-     */
     public function getData()
     {
         return $this->data;
     }
 
     /**
-     * @param array $data
+     * @param mixed $data
      */
     public function setData($data): void
     {

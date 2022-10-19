@@ -52,6 +52,7 @@
         ├─piano
         ├─ping
         ├─ps
+        ├─punycode
         ├─qrcode
         ├─random_anime_images
         ├─random_beauty_images

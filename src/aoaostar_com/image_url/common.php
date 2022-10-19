@@ -1,8 +1,8 @@
 <?php
 
-define("USERAGENT", 'User-Agent:Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_8; en-us) AppleWebKit/534.50 (KHTML, like Gecko) Version/5.1 Safari/534.50');
-define("CONTENT_TYPE_MULTIPART_FORM_DATA", 'Content-Type:multipart/form-data');
-define("CONTENT_TYPE_APPLICATION_JSON", 'Content-Type: application/json');
+!defined('USERAGENT') && define("USERAGENT", 'User-Agent:Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_8; en-us) AppleWebKit/534.50 (KHTML, like Gecko) Version/5.1 Safari/534.50');
+!defined('CONTENT_TYPE_MULTIPART_FORM_DATA') &&define("CONTENT_TYPE_MULTIPART_FORM_DATA", 'Content-Type:multipart/form-data');
+!defined('CONTENT_TYPE_APPLICATION_JSON') &&define("CONTENT_TYPE_APPLICATION_JSON", 'Content-Type: application/json');
 
 
 if (!function_exists('rand_ip')) {
