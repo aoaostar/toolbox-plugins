@@ -1,0 +1,65 @@
+{extend name="layout/plugin_layout" /}
+
+{block name="title"}{$plugin.title} - {$app.title}{/block}
+
+{block name="head"}
+<script src="https://cdn.staticfile.org/punycode/1.4.1/punycode.min.js"></script>
+{/block}
+{block name="main"}
+<div class="container mx-auto" id="app">
+    <div class="card lg:card-side bordered shadow-lg">
+        <div class="card-body">
+
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text">域名</span>
+                </label>
+                <input type="text" v-model="input" class="input input-bordered" placeholder="请输入域名" @keyup.enter="encode">
+            </div>
+            <div class="card-actions gap-2 my-4">
+                <button class="btn btn-primary flex-1" @click="encode">编码</button>
+                <button class="btn btn-primary flex-1" @click="decode">解码</button>
+            </div>
+
+            <div class="form-control" v-show="output">
+                <label class="label">
+                    <span class="label-text">结果</span>
+                </label>
+                <textarea class="textarea textarea-bordered" v-text="output" rows="5" readonly></textarea>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            input: '',
+            output: '',
+        },
+        created() {
+        },
+        methods: {
+            format(str) {
+                return str.trim().toLowerCase()
+            },
+            encode() {
+                const match = this.input.match(/(^https?:\/\/)([\s\S]*)/)
+
+                let pre = ''
+                let content = this.input
+                if (match?.length >= 3) {
+                    pre = match[1]
+                    content = match[2]
+                }
+                this.output = pre + punycode.toASCII(this.format(content));
+            },
+            decode() {
+                this.output = punycode.toUnicode(this.format(this.input));
+            },
+        },
+    })
+</script>
+
+{/block}
