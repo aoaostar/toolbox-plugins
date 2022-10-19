@@ -1,0 +1,88 @@
+{extend name="layout/plugin_layout" /}
+﻿
+{block name="title"}{$plugin.title} - {$app.title}{/block}
+{block name="head"}
+{/block}
+{block name="main"}
+<div class="container mx-auto" id="app">
+    <div class="card lg:card-side bordered shadow-lg">
+        <div class="card-body">
+            <div class="main">
+                <div class="form-control">
+                    <label class="cursor-pointer label">
+                        <span class="label-text">大小写</span>
+                        <input v-model="set.case" type="checkbox" class="toggle">
+                    </label>
+                </div>
+                <div class="form-control">
+                    <label class="cursor-pointer label">
+                        <span class="label-text">分隔符（-）</span>
+                        <select class="select select-bordered" v-model="set.separator">
+                            <option value=":">英文冒号[:]</option>
+                            <option value="-">短横杠[-]</option>
+                            <option value=" ">空格[ ]</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">生成数量</span>
+                    </label>
+                    <input v-model="set.quantity" type="number" placeholder="生成数量"
+                           class="input input-bordered">
+                </div>
+            </div>
+            <div class="card-actions">
+                <button class="btn btn-primary btn-block" @click="generate">生成</button>
+            </div>
+            <div class="form-control" v-if="result">
+                <label class="label">
+                    <span class="label-text">结果</span>
+                </label>
+                <textarea v-model="result" class="textarea textarea-bordered  h-48" rows="5"></textarea>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            set: {
+                case: true,
+                separator: ':',
+                quantity: 5,
+            },
+            result: '',
+        },
+        created() {
+        },
+        methods: {
+            generateMac(separator = ':') {
+                let mac = []
+
+                for (let i = 0; i < 6; i++) {
+                    mac.push(
+                        Math.floor(Math.random() * 16).toString(16) + '' + Math.floor(Math.random() * 16).toString(16)
+                    )
+                }
+
+                return mac.join(separator)
+            },
+            generate() {
+                let arr = [];
+                for (let i = 0; i < this.set.quantity; i++) {
+                    arr.push(this.generateMac(this.set.separator))
+                }
+                this.result = arr.join('\n')
+                if (this.set.case) {
+                    this.result = this.result.toUpperCase()
+                }
+            },
+        },
+    })
+
+</script>
+
+{/block}
