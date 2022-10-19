@@ -56,6 +56,7 @@
         ├─qrcode
         ├─random_anime_images
         ├─random_beauty_images
+        ├─rand_mac
         ├─rand_password
         ├─rentry
         ├─roll_call
@@ -68,6 +69,7 @@
         ├─str_count
         ├─subconverter
         ├─svg_editor
+        ├─text_deduplicate
         ├─timestamp
         ├─translate_baidu
         ├─translate_bing
