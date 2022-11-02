@@ -1,0 +1,89 @@
+{extend name="layout/plugin_layout" /}
+
+{block name="title"}{$plugin.title} - {$app.title}{/block}
+{block name="head"}
+<link rel="stylesheet" type="text/css" href="{:plugin_static()}/ckplayer/css/ckplayer.css">
+<script type="text/javascript" charset="utf-8" src="{:plugin_static()}/ckplayer/js/ckplayer.js"></script>
+<style>
+</style>
+{/block}
+{block name="main"}
+<div class="container mx-auto" id="app">
+    <div class="card lg:card-side bordered shadow-lg flex flex-col">
+        <div class="card-body">
+            <div class="mb-4 w-full h-96" id="player"></div>
+            <div class="alert shadow-lg bg-base-200/30">
+                <div class="flex-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#2196f3"
+                         class="w-6 h-6 mx-2">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <label>支持mp4、hls、flv、ts等视频播放</label>
+                </div>
+            </div>
+            <div class="form-control">
+                <label class="cursor-pointer label">
+                    <span class="label-text">直播</span>
+                    <input v-model="options.live" type="checkbox" class="toggle">
+                </label>
+            </div>
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text">播放链接</span>
+                </label>
+                <input v-model="options.video" type="text" placeholder="请输入播放链接"
+                       class="input input-bordered">
+            </div>
+            <button class="btn btn-primary btn-block" @click="play">播放</button>
+        </div>
+    </div>
+</div>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            player: null,
+            options: {
+                container: '#player', //容器的ID或className
+                live: false,//指定为直播
+                plug: 'hls.js',//使用hls.js插件播放m3u8
+                video: '{:request()->get("url")}' || '//sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/hls/xgplayer-demo.m3u8',
+
+            }
+        },
+        watch: {
+            'options.live'() {
+                this.play()
+            }
+        },
+        mounted() {
+            this.play()
+        },
+        methods: {
+            play() {
+                this.player?.remove()
+                const extension = this.options.video.slice(this.options.video.lastIndexOf('.') + 1)
+
+                switch (extension) {
+                    case 'm3u8':
+                        this.options.plug = 'hls.js'
+                        break;
+                    case 'flv':
+                        this.options.plug = 'flv.js'
+                        break;
+                    case 'ts':
+                        this.options.plug = 'mpegts.js'
+                        break;
+                }
+                this.player = new ckplayer(this.options);
+                // this.player.addListener('loadedMetaData',()=>{
+                //     console.log(this.player.videoHeight())
+                //     this.player.height(this.player.videoHeight())
+                // })
+            }
+        },
+    })
+</script>
+
+{/block}

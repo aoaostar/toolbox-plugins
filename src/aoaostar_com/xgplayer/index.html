@@ -1,0 +1,102 @@
+{extend name="layout/plugin_layout" /}
+
+{block name="title"}{$plugin.title} - {$app.title}{/block}
+
+{block name="main"}
+<div class="container mx-auto" id="app">
+    <div class="card lg:card-side bordered shadow-lg flex flex-col">
+        <div class="card-body">
+            <div class="mb-4 w-full" id="player"></div>
+            <div class="alert shadow-lg bg-base-200/30">
+                <div class="flex-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#2196f3"
+                         class="w-6 h-6 mx-2">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <label>不支持跨域播放</label>
+                </div>
+            </div>
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text">播放链接</span>
+                </label>
+                <input v-model="options.url" type="text" placeholder="请输入播放链接"
+                       class="input input-bordered">
+            </div>
+            <div class="form-control">
+                <label class="cursor-pointer label">
+                    <span class="label-text">直播</span>
+                    <input v-model="options.isLive" type="checkbox" class="toggle">
+                </label>
+            </div>
+            <button class="btn btn-primary btn-block" @click="play">播放</button>
+        </div>
+    </div>
+</div>
+
+<script src="{:npm_cdn()}/xgplayer@2.32.1/browser/index.js"></script>
+<script src="{:npm_cdn()}/xgplayer-hls.js@2.6.3/browser/index.js"></script>
+<script src="{:npm_cdn()}/xgplayer-flv.js@2.3.0/browser/index.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            player: null,
+            options: {
+                id: 'player',
+                autoplay: true,
+                url: '{:request()->get("url")}' || '//sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/hls/xgplayer-demo.m3u8',
+                height: '100%',
+                width: '100%',
+                videoInit: true,
+                playbackRate: [0.5, 0.75, 1, 1.5, 2],
+                defaultPlaybackRate: 1,
+                rotate: {   //视频旋转按钮配置项
+                    innerRotate: true, //只旋转内部video
+                    clockwise: false // 旋转方向是否为顺时针
+                },
+                screenShot: {
+                    saveImg: true,
+                    quality: 1,
+                    type: 'image/png',
+                    format: '.png'
+                },
+                rotateFullscreen: true,
+                pip: true,
+                miniplayer: true, //迷你播放器
+                cssFullscreen: true,//网页样式全屏
+                lang: 'zh-cn',
+                cors: false,
+                isLive: false, //直播场景设置为true
+            }
+        },
+        watch: {
+            'options.isLive'() {
+                this.play()
+            }
+        },
+        mounted() {
+            this.play()
+        },
+        methods: {
+            play() {
+                this.player?.destroy()
+                const extension = this.options.url.slice(this.options.url.lastIndexOf('.') + 1)
+                let player = window.Player
+                switch (extension) {
+                    case 'm3u8':
+                        player = HlsJsPlayer
+                        break;
+                    case 'flv':
+                        player = FlvJsPlayer
+                        break;
+                }
+                this.player = new player(this.options);
+                this.player?.play()
+            }
+        },
+    })
+</script>
+
+{/block}
