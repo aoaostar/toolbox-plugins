@@ -24,6 +24,7 @@
         ├─bullshit_generator
         ├─byte_calc
         ├─carbon
+        ├─ckplayer
         ├─code_css
         ├─code_html
         ├─code_js
@@ -80,6 +81,7 @@
         ├─tz
         ├─urlencode
         ├─uuid
+        ├─xgplayer
         ├─youth_learning
         └─zh_convert
 ```
