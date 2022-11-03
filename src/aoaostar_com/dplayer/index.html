@@ -1,15 +1,11 @@
 {extend name="layout/plugin_layout" /}
 
 {block name="title"}{$plugin.title} - {$app.title}{/block}
-{block name="head"}
-<link rel="stylesheet" type="text/css" href="{:plugin_static()}/ckplayer/css/ckplayer.css">
-<script type="text/javascript" charset="utf-8" src="{:plugin_static()}/ckplayer/js/ckplayer.js"></script>
-{/block}
 {block name="main"}
 <div class="container mx-auto" id="app">
     <div class="card lg:card-side bordered shadow-lg flex flex-col">
         <div class="card-body">
-            <div class="mb-4 w-full h-96" id="player"></div>
+            <div class="mb-4 w-full" id="player"></div>
             <div class="alert shadow-lg bg-base-200/30">
                 <div class="flex-1">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#2196f3"
@@ -30,24 +26,32 @@
                 <label class="label">
                     <span class="label-text">播放链接</span>
                 </label>
-                <input v-model="options.video" type="text" placeholder="请输入播放链接"
+                <input v-model="options.url" type="text" placeholder="请输入播放链接"
                        class="input input-bordered">
             </div>
             <button class="btn btn-primary btn-block" @click="play">播放</button>
         </div>
     </div>
 </div>
+<script type="text/javascript" charset="utf-8" src="{:cdnjs_cdn()}/dplayer/1.27.0/DPlayer.min.js"></script>
+<script type="text/javascript" charset="utf-8" src="{:cdnjs_cdn()}/hls.js/1.2.4/hls.min.js"></script>
+<script type="text/javascript" charset="utf-8" src="{:cdnjs_cdn()}/flv.js/1.6.2/flv.min.js"></script>
 <script>
     new Vue({
         el: '#app',
         data: {
             player: null,
             options: {
-                container: '#player', //容器的ID或className
-                live: false,//指定为直播
-                plug: 'hls.js',//使用hls.js插件播放m3u8
-                video: '{:request()->get("url")}' || '//sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/hls/xgplayer-demo.m3u8',
-
+                url: '{:request()->get("url")}' || '//sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/hls/xgplayer-demo.m3u8',
+                autoplay: true,
+                theme: '#FADFA3',
+                lang: 'zh-cn',
+                screenshot: true,
+                hotkey: true,
+                preload: 'auto',
+                volume: 0.7,
+                mutex: true,
+                live: false,
             }
         },
         watch: {
@@ -60,21 +64,21 @@
         },
         methods: {
             play() {
-                this.player?.remove()
-                const extension = this.options.video.slice(this.options.video.lastIndexOf('.') + 1)
-
+                this.player?.destroy()
+                const extension = this.options.url.slice(this.options.url.lastIndexOf('.') + 1)
                 switch (extension) {
                     case 'm3u8':
-                        this.options.plug = 'hls.js'
+                        this.options.type = 'hls'
                         break;
                     case 'flv':
-                        this.options.plug = 'flv.js'
-                        break;
-                    case 'ts':
-                        this.options.plug = 'mpegts.js'
+                        this.options.type = 'flv.js'
                         break;
                 }
-                this.player = new ckplayer(this.options);
+                this.player = new DPlayer({
+                    container: document.getElementById('player'),
+                    video: this.options,
+                    live: this.options.live,
+                });
             }
         },
     })
