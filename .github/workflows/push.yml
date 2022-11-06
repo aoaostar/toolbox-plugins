@@ -1,0 +1,23 @@
+on: [ push ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Get Config
+        run:
+          cat > config.ini <<EOF
+          
+          ${{ secrets.TOOL_CLOUD_CONFIG }}
+          
+          EOF
+
+      - name: Sync Action
+        uses: aoaostar/toolbox-plugins-sync-action@main
+        with:
+          config_path: ${{ github.workspace }}/config.ini
+          plugin_path: ${{ github.workspace }}/src
